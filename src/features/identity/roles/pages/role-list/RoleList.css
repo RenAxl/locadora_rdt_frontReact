@@ -1,0 +1,73 @@
+.btn-crud-action {
+  width: 100%;
+  height: 50px;
+  border-radius: 10px;
+  font-size: 16px;
+  letter-spacing: -0.015em;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.role-actions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.action-link {
+  display: block;
+  width: 100%;
+  text-decoration: none;
+}
+
+.actions-wrap {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .role-filter-container {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .role-actions-group {
+    flex-direction: row;
+    width: auto;
+    gap: 12px;
+  }
+
+  .btn-crud-action {
+    width: auto;
+    height: 60px;
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .btn-crud-action {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.1;
+    width: auto;
+    height: 40px;
+    margin-bottom: 0;
+  }
+
+  .role-actions-group {
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .actions-wrap {
+    flex-wrap: wrap;
+  }
+}

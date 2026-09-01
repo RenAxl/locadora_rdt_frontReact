@@ -1,0 +1,83 @@
+.role-permissions-dialog .role-name {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid rgba(35, 50, 71, 0.12);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.role-permissions-dialog .role-name span {
+  display: block;
+  margin-bottom: 4px;
+  color: #6c757d;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.role-permissions-dialog .permission-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.role-permissions-dialog .permission-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.role-permissions-dialog .permission-selection > span {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.role-permissions-dialog .permission-checkbox,
+.role-permissions-dialog .permission-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-permissions-dialog .permissions-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 0;
+  color: #6c757d;
+}
+
+.role-permissions-dialog .permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin-top: 16px;
+}
+
+.role-permissions-dialog .permissions-empty {
+  grid-column: 1 / -1;
+  padding: 24px;
+  color: #6c757d;
+  text-align: center;
+}
+
+.permission-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .role-permissions-dialog .permission-filters,
+  .role-permissions-dialog .permission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .role-permissions-dialog .permission-selection {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

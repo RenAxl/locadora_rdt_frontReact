@@ -1,0 +1,67 @@
+p-inputnumber.salary-input-host {
+  display: block !important;
+  width: 100% !important;
+}
+
+p-inputnumber.salary-input-host .p-inputnumber {
+  width: 100% !important;
+}
+
+p-inputnumber.salary-input-host .p-inputtext {
+  width: 100% !important;
+  height: 46px !important;
+  border-radius: 10px !important;
+}
+
+.table-columns-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+.module-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 2rem;
+  margin-bottom: 2rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #17233f, #3156a3);
+  color: #ffffff;
+  box-shadow: 0 18px 40px rgba(23, 35, 63, 0.2);
+}
+
+.module-page-header .module-page-eyebrow {
+  color: #9fc5ff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.module-page-header h1 {
+  margin: 0.2rem 0;
+  font-size: clamp(1.7rem, 3.2vw, 2.3rem);
+  font-weight: 750;
+}
+
+.module-page-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.module-page-header .module-page-header-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 2rem;
+}
+
+@media (max-width: 600px) {
+  .module-page-header { padding: 1rem; }
+  .module-page-header .module-page-header-icon { display: none; }
+}

@@ -1,0 +1,129 @@
+.global-table-card {
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.p-datatable.global-table .p-datatable-thead > tr > th {
+  color: #ffffff;
+  border-color: #2f3a45;
+  background: #2f3a45;
+  font-weight: 600;
+}
+
+.p-datatable.global-table .p-datatable-thead > tr > th .p-column-title,
+.p-datatable.global-table .p-datatable-thead > tr > th .p-sortable-column-icon {
+  color: #ffffff;
+}
+
+.global-table .selection-column {
+  width: 48px;
+  text-align: center;
+}
+
+.global-table .actions-column {
+  width: 180px;
+  text-align: right;
+}
+
+.global-table .actions-cell {
+  white-space: nowrap;
+}
+
+.global-table .row-inactive td {
+  color: rgba(0, 0, 0, 0.55);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.global-table .empty-message {
+  padding: 32px;
+  color: #6c757d;
+  text-align: center;
+}
+
+@media (max-width: 991px) {
+  .global-table-card {
+    padding: 12px;
+    background-color: #f5f6f8;
+    box-shadow: none;
+  }
+
+  .global-table .p-datatable-thead {
+    display: none;
+  }
+
+  .global-table .p-datatable-tbody {
+    display: block;
+  }
+
+  .global-table .p-datatable-tbody > tr {
+    display: block;
+    margin-bottom: 16px;
+    padding: 12px;
+    border: 1px solid #dfe3e8;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  .global-table .p-datatable-tbody > tr > td {
+    display: flex;
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 6px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border: 0;
+    border-bottom: 1px solid #eeeeee;
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .global-table .p-datatable-tbody > tr > td:last-child {
+    border-bottom: 0;
+  }
+
+  .global-table .p-column-title {
+    color: #2f3a45;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .global-table .selection-column {
+    width: 100%;
+    min-height: auto;
+    padding-top: 2px;
+    justify-content: flex-end;
+  }
+
+  .global-table .actions-cell {
+    justify-content: space-between;
+  }
+
+  .global-table .row-inactive {
+    background-color: #f1f1f1;
+  }
+
+  .global-table .empty-message {
+    display: block;
+    text-align: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .global-table-card {
+    padding: 8px;
+  }
+
+  .global-table .p-datatable-tbody > tr {
+    padding: 10px;
+  }
+}

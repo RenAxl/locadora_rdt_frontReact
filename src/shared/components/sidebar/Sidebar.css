@@ -1,0 +1,159 @@
+.sidebar {
+  --bs-offcanvas-width: 220px;
+  width: 220px !important;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1050;
+  background-color: #0B1E39 !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.sidebar-header {
+  height: 56px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.system-icon i {
+  color: #e0e8ff;
+  font-size: 1.55rem;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.system-name {
+  margin-bottom: 0;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.sidebar-menu .header {
+  padding: 1rem 1rem 0.5rem;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.header-chip {
+  padding: 0.22rem 1.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #fff;
+  background: radial-gradient(
+    circle at top left,
+    rgba(255, 255, 255, 0.28),
+    rgba(0, 0, 0, 0.25)
+  );
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.45);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.sidebar-menu .treeview > a {
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+  border-left: 3px solid transparent;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.25s ease-in-out;
+}
+
+.sidebar-menu .treeview > a:hover,
+.sidebar-menu .treeview > a.active {
+  padding-left: 1.2rem;
+  border-left-color: rgba(255, 255, 255, 0.85);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.sidebar-menu .treeview > a:hover :is(span, i),
+.sidebar-menu .treeview > a.active :is(span, i) {
+  color: #fff !important;
+  text-shadow:
+    0 0 4px rgba(255, 255, 255, 0.8),
+    0 0 6px rgba(255, 255, 255, 0.5),
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.submenu-toggle-icon.open {
+  display: none;
+}
+
+.treeview > a:not(.collapsed) .submenu-toggle-icon.closed {
+  display: none;
+}
+
+.treeview > a:not(.collapsed) .submenu-toggle-icon.open {
+  display: inline-block;
+}
+
+.treeview-menu .nav-link {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.treeview-menu .nav-link:hover,
+.treeview-menu .nav-link.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    top: 56px;
+    height: calc(100vh - 56px);
+    min-height: 0;
+  }
+
+  .sidebar-header {
+    height: auto;
+    padding: 14px 16px 16px;
+  }
+
+  .sidebar-header > div {
+    min-width: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .system-name {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    font-size: 0.98rem;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-nav {
+    overflow-y: auto;
+  }
+}
