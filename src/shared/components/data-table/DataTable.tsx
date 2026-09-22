@@ -1,11 +1,11 @@
-import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { DataTable as PrimeDataTable } from 'primereact/datatable';
-import { PageResponse } from '../../../core/models/page-response';
-import { Pagination } from '../../../core/models/Pagination';
-import { ExcelExport } from '../excel-export/ExcelExport';
-import { DataTableColumn } from './models/data-table-column';
-import './DataTable.css';
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
+import { DataTable as PrimeDataTable } from "primereact/datatable";
+import { PageResponse } from "../../../core/models/page-response";
+import { Pagination } from "../../../core/models/Pagination";
+import { ExcelExport } from "../excel-export/ExcelExport";
+import { DataTableColumn } from "./models/data-table-column";
+import "./DataTable.css";
 
 export interface LazyLoadEvent {
   first?: number;
@@ -35,18 +35,21 @@ interface DataTableProps<T extends { id?: number; active?: boolean }> {
   onColumnsButtonClick: () => void;
 }
 
-export function DataTable<T extends { id?: number; active?: boolean }>(props: DataTableProps<T>) {
+export function DataTable<T extends { id?: number; active?: boolean }>(
+  props: DataTableProps<T>,
+) {
   const getFieldValue = (record: any, field: string): any => {
     let value = record;
-    field.split('.').forEach((item) => {
+    field.split(".").forEach((item) => {
       if (value != null) value = value[item];
     });
-    if (value === null || value === undefined || value === '') return '-';
+    if (value === null || value === undefined || value === "") return "-";
     return value;
   };
 
   const bodyFor = (column: DataTableColumn) => (record: T) => {
-    if (props.columnTemplates?.[column.field]) return props.columnTemplates[column.field](record);
+    if (props.columnTemplates?.[column.field])
+      return props.columnTemplates[column.field](record);
     return getFieldValue(record, column.field);
   };
 
@@ -55,33 +58,73 @@ export function DataTable<T extends { id?: number; active?: boolean }>(props: Da
       {(props.showColumnsButton || props.showExportButton) && (
         <div className="table-toolbar">
           {props.showColumnsButton && (
-            <Button type="button" className="p-button-rounded p-button-text" icon="pi pi-cog"
-              tooltip="Personalizar colunas" tooltipOptions={{ position: 'left' }}
-              onClick={props.onColumnsButtonClick} />
+            <Button
+              type="button"
+              className="p-button-rounded p-button-text"
+              icon="pi pi-cog"
+              tooltip="Personalizar colunas"
+              tooltipOptions={{ position: "left" }}
+              onClick={props.onColumnsButtonClick}
+            />
           )}
           {props.showExportButton && (
-            <ExcelExport title={props.exportTitle} fileName={props.exportFileName} fields={props.columns}
-              pagination={props.exportPagination} totalRecords={props.totalRecords}
-              loadRecords={props.exportLoadRecords} />
+            <ExcelExport
+              title={props.exportTitle}
+              fileName={props.exportFileName}
+              fields={props.columns}
+              pagination={props.exportPagination}
+              totalRecords={props.totalRecords}
+              loadRecords={props.exportLoadRecords}
+            />
           )}
         </div>
       )}
 
-      <PrimeDataTable value={props.records} dataKey="id" className="global-table" lazy paginator selectionMode="multiple"
-        responsiveLayout="stack" breakpoint="991px"
-        first={props.exportPagination.page * props.rows} rows={props.rows} totalRecords={props.totalRecords}
-        loading={props.loading} selection={props.selectedRecords} emptyMessage={props.emptyMessage}
-        rowClassName={(record) => record.active === false ? 'row-inactive' : ''}
-        onSelectionChange={(event) => props.onSelectedRecordsChange(event.value as unknown as T[])}
-        onPage={(event) => props.onLazyLoad(event)} onSort={(event) => props.onLazyLoad(event)}>
-        <Column selectionMode="multiple" headerStyle={{ width: '48px' }} className="selection-column" />
+      <PrimeDataTable
+        value={props.records}
+        dataKey="id"
+        className="global-table"
+        lazy
+        paginator
+        selectionMode="multiple"
+        responsiveLayout="stack"
+        breakpoint="991px"
+        first={props.exportPagination.page * props.rows}
+        rows={props.rows}
+        totalRecords={props.totalRecords}
+        loading={props.loading}
+        selection={props.selectedRecords}
+        emptyMessage={props.emptyMessage}
+        rowClassName={(record) =>
+          record.active === false ? "row-inactive" : ""
+        }
+        onSelectionChange={(event) =>
+          props.onSelectedRecordsChange(event.value as unknown as T[])
+        }
+        onPage={(event) => props.onLazyLoad(event)}
+        onSort={(event) => props.onLazyLoad(event)}
+      >
+        <Column
+          selectionMode="multiple"
+          headerStyle={{ width: "48px" }}
+          className="selection-column"
+        />
         {props.columns.map((column) => (
-          <Column key={column.field} field={column.field} header={column.label} sortable={column.sortable}
-            body={bodyFor(column)} />
+          <Column
+            key={column.field}
+            field={column.field}
+            header={column.label}
+            sortable={column.sortable}
+            body={bodyFor(column)}
+          />
         ))}
         {props.actionsTemplate && (
-          <Column header="Ações" body={props.actionsTemplate} className="actions-cell"
-            headerClassName="actions-column" />
+          <Column
+            header="Ações"
+            body={props.actionsTemplate}
+            className="actions-cell"
+            headerClassName="actions-column"
+          />
         )}
       </PrimeDataTable>
     </div>

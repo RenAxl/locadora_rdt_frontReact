@@ -1,12 +1,12 @@
-import { Address } from './Address';
+import { Address } from "./Address";
 
 export class User {
   id?: number;
-  name = '';
-  email = '';
+  name = "";
+  email = "";
   password?: string;
   active = true;
-  telephone = '';
+  telephone = "";
   address = new Address();
   roleIds: number[] = [];
   roles: string[] = [];

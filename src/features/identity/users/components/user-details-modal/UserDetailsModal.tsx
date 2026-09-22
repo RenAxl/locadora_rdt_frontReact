@@ -122,7 +122,9 @@ export function UserDetailsModal({
             <span>Perfis</span>
             {user.roles.length > 0 ? (
               user.roles.map((role) => (
-                <strong className="role-chip" key={role}>{role}</strong>
+                <strong className="role-chip" key={role}>
+                  {role}
+                </strong>
               ))
             ) : (
               <strong>-</strong>

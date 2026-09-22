@@ -1,0 +1,167 @@
+.profile-form-container {
+  width: 100%;
+}
+
+.profile-form-container .profile-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.profile-form-container .profile-form-inputs .form-control {
+  height: 46px;
+}
+
+.profile-form-container .profile-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.profile-form-container .profile-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.profile-form-container .profile-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.profile-form-container .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+.profile-form-container .field-help {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+@media (min-width: 992px) {
+  .profile-form-container .profile-form-buttons {
+    justify-content: flex-end;
+  }
+}
+
+.profile-form-container .profile-photo-header {
+  margin-bottom: 18px;
+}
+
+.profile-form-container .profile-photo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.profile-form-container .profile-photo-frame {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+  flex: 0 0 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-form-container .profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-form-container .profile-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
+}
+
+.profile-form-container .profile-photo-icon {
+  font-size: 34px;
+  opacity: 0.55;
+}
+
+.profile-form-container .profile-photo-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-form-container .profile-photo-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.profile-form-container .profile-photo-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+
+.profile-form-container .profile-photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-form-container .upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.15s ease;
+}
+
+.profile-form-container .upload-btn:hover {
+  transform: translateY(-1px);
+}
+
+.profile-form-container .upload-btn:active {
+  transform: translateY(0px);
+}
+
+.profile-form-container .upload-btn-icon {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.profile-form-container .upload-input {
+  display: none;
+}
+
+.profile-form-container .file-chip {
+  max-width: 280px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,5 +1,5 @@
 export class RoleInsertDTO {
-  authority = '';
+  authority = "";
 
   constructor(role?: Partial<RoleInsertDTO>) {
     if (role != null) Object.assign(this, role);

@@ -1,11 +1,11 @@
-import { AddressDTO } from './address-dto';
+import { AddressDTO } from "./address-dto";
 
 export class UserUpdateDTO {
   id?: number;
-  name = '';
-  email = '';
+  name = "";
+  email = "";
   active = true;
-  telephone = '';
+  telephone = "";
   address = new AddressDTO();
   roleIds: number[] = [];
 

@@ -1,4 +1,4 @@
-import { PermissionDTO } from '../../permissions/dtos/permission-dto';
+import { PermissionDTO } from "../../permissions/dtos/permission-dto";
 
 export class RoleDTO {
   id?: number;

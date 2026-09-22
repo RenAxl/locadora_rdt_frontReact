@@ -37,14 +37,15 @@
 }
 
 .user-photo {
-  transition: filter 0.2s, opacity 0.2s;
+  transition:
+    filter 0.2s,
+    opacity 0.2s;
 }
 
 .row-inactive .user-photo {
   filter: grayscale(100%);
   opacity: 0.8;
 }
-
 
 @media (min-width: 768px) {
   .user-filter-container {

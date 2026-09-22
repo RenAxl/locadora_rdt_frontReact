@@ -1,17 +1,23 @@
-import { API } from '../../../../core/config/api.config';
-import { httpClient } from '../../../../core/http/interceptors/http-client';
-import { PageResponse } from '../../../../core/models/page-response';
-import { Pagination } from '../../../../core/models/Pagination';
-import { buildPaginationParams } from '../../../../core/utils/pagination-params.util';
-import { UserDetailsDTO } from '../dtos/user-details-dto';
-import { UserDTO } from '../dtos/user-dto';
-import { UserInsertDTO } from '../dtos/user-insert-dto';
-import { UserUpdateDTO } from '../dtos/user-update-dto';
+import { API } from "../../../../core/config/api.config";
+import { httpClient } from "../../../../core/http/interceptors/http-client";
+import { PageResponse } from "../../../../core/models/page-response";
+import { Pagination } from "../../../../core/models/Pagination";
+import { buildPaginationParams } from "../../../../core/utils/pagination-params.util";
+import { UserDetailsDTO } from "../dtos/user-details-dto";
+import { UserDTO } from "../dtos/user-dto";
+import { UserInsertDTO } from "../dtos/user-insert-dto";
+import { UserUpdateDTO } from "../dtos/user-update-dto";
 
 export const userService = {
-  async list(pagination: Pagination, filterName: string): Promise<PageResponse<UserDTO>> {
-    const params = buildPaginationParams(pagination, 'name', filterName);
-    const response = await httpClient.get<PageResponse<UserDTO>>(API.USERS.ROOT, { params });
+  async list(
+    pagination: Pagination,
+    filterName: string,
+  ): Promise<PageResponse<UserDTO>> {
+    const params = buildPaginationParams(pagination, "name", filterName);
+    const response = await httpClient.get<PageResponse<UserDTO>>(
+      API.USERS.ROOT,
+      { params },
+    );
     return response.data;
   },
 
@@ -26,8 +32,11 @@ export const userService = {
   },
 
   async update(dto: UserUpdateDTO): Promise<UserDTO> {
-    if (!dto.id) throw new Error('User ID is required for update');
-    const response = await httpClient.put<UserDTO>(API.USERS.BY_ID(dto.id), dto);
+    if (!dto.id) throw new Error("User ID is required for update");
+    const response = await httpClient.put<UserDTO>(
+      API.USERS.BY_ID(dto.id),
+      dto,
+    );
     return response.data;
   },
 
@@ -40,11 +49,15 @@ export const userService = {
   },
 
   async changeActive(id: number, active: boolean): Promise<void> {
-    await httpClient.patch(API.USERS.CHANGE_ACTIVE(id), active);
+    await httpClient.patch(API.USERS.CHANGE_ACTIVE(id), active, {
+      headers: { "Content-Type": "application/json" },
+    });
   },
 
   async getUserPhoto(id: number): Promise<Blob> {
-    const response = await httpClient.get(API.USERS.PHOTO(id), { responseType: 'blob' });
+    const response = await httpClient.get(API.USERS.PHOTO(id), {
+      responseType: "blob",
+    });
     return response.data;
   },
 };

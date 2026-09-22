@@ -1,4 +1,4 @@
-import { AddressDTO } from './address-dto';
+import { AddressDTO } from "./address-dto";
 
 export class UserDetailsDTO {
   id?: number;

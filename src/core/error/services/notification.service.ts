@@ -1,5 +1,5 @@
 export interface NotificationMessage {
-  severity: 'success' | 'error' | 'info' | 'warn';
+  severity: "success" | "error" | "info" | "warn";
   detail: string;
 }
 

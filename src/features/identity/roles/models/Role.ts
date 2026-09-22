@@ -1,8 +1,8 @@
-import { Permission } from '../../permissions/models/Permission';
+import { Permission } from "../../permissions/models/Permission";
 
 export class Role {
   id?: number;
-  authority = '';
+  authority = "";
   permissionsCount = 0;
   permissions: Permission[] = [];
   createdAt?: Date;

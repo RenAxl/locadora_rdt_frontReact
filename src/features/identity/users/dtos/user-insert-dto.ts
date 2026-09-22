@@ -1,9 +1,9 @@
-import { AddressDTO } from './address-dto';
+import { AddressDTO } from "./address-dto";
 
 export class UserInsertDTO {
-  name = '';
-  email = '';
-  telephone = '';
+  name = "";
+  email = "";
+  telephone = "";
   address?: AddressDTO;
   roleIds: number[] = [];
 

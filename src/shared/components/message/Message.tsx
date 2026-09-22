@@ -1,4 +1,4 @@
-import './Message.css';
+import "./Message.css";
 
 interface MessageProps {
   visible: boolean;

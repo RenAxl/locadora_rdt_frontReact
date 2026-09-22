@@ -62,6 +62,10 @@ p-inputnumber.salary-input-host .p-inputtext {
 }
 
 @media (max-width: 600px) {
-  .module-page-header { padding: 1rem; }
-  .module-page-header .module-page-header-icon { display: none; }
+  .module-page-header {
+    padding: 1rem;
+  }
+  .module-page-header .module-page-header-icon {
+    display: none;
+  }
 }

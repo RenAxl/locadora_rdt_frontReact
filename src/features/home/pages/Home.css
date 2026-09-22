@@ -1,4 +1,3 @@
-
 .home-page {
   min-height: 100%;
   padding: 1.25rem;
@@ -12,7 +11,7 @@
   align-items: flex-end;
   overflow: hidden;
   border-radius: 24px;
-  background-image: url('/assets/images/home/games-showcase.png');
+  background-image: url("/assets/images/home/games-showcase.png");
   background-position: center;
   background-size: cover;
   box-shadow: 0 24px 60px rgba(10, 20, 45, 0.22);
@@ -21,7 +20,12 @@
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(4, 9, 27, 0.94) 0%, rgba(4, 9, 27, 0.66) 40%, rgba(4, 9, 27, 0.08) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(4, 9, 27, 0.94) 0%,
+    rgba(4, 9, 27, 0.66) 40%,
+    rgba(4, 9, 27, 0.08) 75%
+  );
 }
 
 .hero-content {
@@ -113,7 +117,9 @@
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 12px 28px rgba(25, 38, 70, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .game-card:hover {
@@ -123,16 +129,26 @@
 
 .game-image {
   height: 230px;
-  background-image: url('/assets/images/home/games-showcase.png');
+  background-image: url("/assets/images/home/games-showcase.png");
   background-repeat: no-repeat;
   background-size: 500% 100%;
 }
 
-.game-image.mario { background-position: 0% center; }
-.game-image.final-fantasy { background-position: 25% center; }
-.game-image.zelda { background-position: 50% center; }
-.game-image.metal-gear { background-position: 75% center; }
-.game-image.resident-evil { background-position: 100% center; }
+.game-image.mario {
+  background-position: 0% center;
+}
+.game-image.final-fantasy {
+  background-position: 25% center;
+}
+.game-image.zelda {
+  background-position: 50% center;
+}
+.game-image.metal-gear {
+  background-position: 75% center;
+}
+.game-image.resident-evil {
+  background-position: 100% center;
+}
 
 .game-card-content {
   min-height: 104px;
@@ -191,7 +207,12 @@
   }
 
   .hero-overlay {
-    background: linear-gradient(0deg, rgba(4, 9, 27, 0.96) 0%, rgba(4, 9, 27, 0.54) 70%, rgba(4, 9, 27, 0.2) 100%);
+    background: linear-gradient(
+      0deg,
+      rgba(4, 9, 27, 0.96) 0%,
+      rgba(4, 9, 27, 0.54) 70%,
+      rgba(4, 9, 27, 0.2) 100%
+    );
   }
 
   .hero-content {

@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Button } from 'primereact/button';
-import { Checkbox } from 'primereact/checkbox';
-import { Dialog } from 'primereact/dialog';
-import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'primereact/inputtext';
-import { ProgressSpinner } from 'primereact/progressspinner';
-import { notificationService } from '../../../../../core/error/services/notification.service';
-import { PermissionMapper } from '../../../permissions/mappers/permission.mapper';
-import { Permission } from '../../../permissions/models/Permission';
-import { permissionService } from '../../../permissions/services/permission.service';
-import { RoleMapper } from '../../mappers/role.mapper';
-import { roleService } from '../../services/role.service';
-import './RolePermissionsModal.css';
+import { useEffect, useState } from "react";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { notificationService } from "../../../../../core/error/services/notification.service";
+import { PermissionMapper } from "../../../permissions/mappers/permission.mapper";
+import { Permission } from "../../../permissions/models/Permission";
+import { permissionService } from "../../../permissions/services/permission.service";
+import { RoleMapper } from "../../mappers/role.mapper";
+import { roleService } from "../../services/role.service";
+import "./RolePermissionsModal.css";
 
 interface RolePermissionsModalProps {
   visible: boolean;
@@ -23,11 +23,15 @@ interface RolePermissionsModalProps {
 
 export function RolePermissionsModal(props: RolePermissionsModalProps) {
   const [groups, setGroups] = useState<string[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState("");
   const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>([]);
-  const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([]);
-  const [filterName, setFilterName] = useState('');
+  const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(
+    [],
+  );
+  const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>(
+    [],
+  );
+  const [filterName, setFilterName] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -36,11 +40,11 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
 
     const load = async () => {
       setGroups([]);
-      setSelectedGroup('');
+      setSelectedGroup("");
       setPermissions([]);
       setFilteredPermissions([]);
       setSelectedPermissionIds([]);
-      setFilterName('');
+      setFilterName("");
       setSaving(false);
       setLoading(true);
 
@@ -62,7 +66,8 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
           const firstGroup = loadedGroups[0];
           setSelectedGroup(firstGroup);
           const permissionData = await permissionService.list(firstGroup);
-          const loadedPermissions = PermissionMapper.toModelList(permissionData);
+          const loadedPermissions =
+            PermissionMapper.toModelList(permissionData);
           setPermissions(loadedPermissions);
           setFilteredPermissions(loadedPermissions);
         }
@@ -84,8 +89,13 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
       const data = await permissionService.list(groupName);
       const loadedPermissions = PermissionMapper.toModelList(data);
       setPermissions(loadedPermissions);
-      setFilteredPermissions(loadedPermissions);
-      setFilterName('');
+      const search = filterName.trim().toLowerCase();
+      const filtered: Permission[] = [];
+      loadedPermissions.forEach((permission) => {
+        if (!search || permission.name.toLowerCase().includes(search))
+          filtered.push(permission);
+      });
+      setFilteredPermissions(filtered);
     } catch {
       // O interceptor HTTP exibe a mensagem de erro.
     } finally {
@@ -104,7 +114,8 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
 
     const filtered: Permission[] = [];
     permissions.forEach((permission) => {
-      if (permission.name.toLowerCase().includes(search)) filtered.push(permission);
+      if (permission.name.toLowerCase().includes(search))
+        filtered.push(permission);
     });
     setFilteredPermissions(filtered);
   };
@@ -114,7 +125,10 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
     return selectedPermissionIds.includes(permissionId);
   };
 
-  const changePermission = (permissionId: number | undefined, selected: boolean) => {
+  const changePermission = (
+    permissionId: number | undefined,
+    selected: boolean,
+  ) => {
     if (permissionId == null) return;
 
     const updatedIds = [...selectedPermissionIds];
@@ -162,13 +176,15 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
     setSaving(true);
 
     try {
-      const roleToUpdate = RoleMapper.toPermissionsUpdateDTO(selectedPermissionIds);
+      const roleToUpdate = RoleMapper.toPermissionsUpdateDTO(
+        selectedPermissionIds,
+      );
       await roleService.updatePermissions(props.roleId, roleToUpdate);
       props.onSaved();
       props.onHide();
       notificationService.add({
-        severity: 'success',
-        detail: 'Permissões atualizadas com sucesso!',
+        severity: "success",
+        detail: "Permissões atualizadas com sucesso!",
       });
     } catch {
       // O interceptor HTTP exibe a mensagem de erro.
@@ -192,7 +208,12 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
         label="Salvar"
         icon="pi pi-save"
         onClick={save}
-        disabled={loading || saving || !props.roleId || selectedPermissionIds.length === 0}
+        disabled={
+          loading ||
+          saving ||
+          !props.roleId ||
+          selectedPermissionIds.length === 0
+        }
       />
     </div>
   );
@@ -203,7 +224,7 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
       visible={props.visible}
       modal
       className="role-permissions-dialog"
-      style={{ width: '860px', maxWidth: '95vw' }}
+      style={{ width: "860px", maxWidth: "95vw" }}
       footer={footer}
       onHide={props.onHide}
     >
@@ -221,7 +242,7 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
             onChange={(event) => loadPermissions(event.value)}
             disabled={loading || groups.length === 0}
             placeholder="Selecione um grupo"
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
           />
         </div>
 
@@ -251,7 +272,8 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
           </label>
 
           <span>
-            Marcadas neste grupo: {getSelectedPermissionsCount()} / {filteredPermissions.length}
+            Marcadas neste grupo: {getSelectedPermissionsCount()} /{" "}
+            {filteredPermissions.length}
           </span>
         </div>
       )}
@@ -267,14 +289,18 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
             <label className="permission-item" key={permission.id}>
               <Checkbox
                 checked={isSelected(permission.id)}
-                onChange={(event) => changePermission(permission.id, !!event.checked)}
+                onChange={(event) =>
+                  changePermission(permission.id, !!event.checked)
+                }
               />
               <span>{permission.name}</span>
             </label>
           ))}
 
           {filteredPermissions.length === 0 && (
-            <div className="permissions-empty">Nenhuma permissão encontrada.</div>
+            <div className="permissions-empty">
+              Nenhuma permissão encontrada.
+            </div>
           )}
         </div>
       )}

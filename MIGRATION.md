@@ -187,3 +187,109 @@ Esta sincronização atualiza a migração anterior sem recriar o projeto React.
 - o estado dos formulários e modais utiliza `useState` e `useEffect` no lugar de `ngModel` e ciclos de vida Angular;
 - os services usam `async/await` e a instância Axios já existente no lugar de `Observable`;
 - não foram adicionados guards, autenticação ou authorities porque o Angular atual ainda não possui implementação funcional desses recursos.
+
+## Sincronização com Angular - 21/09/2026
+
+Esta seção descreve o estado atual e substitui, para esta versão, as observações históricas acima sobre ausência de autenticação, permissões e configurações. O conteúdo anterior foi preservado.
+
+### Comparação e escopo
+
+Os dois projetos foram analisados antes das alterações. A comparação considerou comportamento, campos, DTOs, endpoints, rotas, permissões, componentes compartilhados, estilos e assets, além do histórico Git do Angular até `3a4aa54`. O React existente foi atualizado incrementalmente; não foi recriado. As alterações locais que já existiam em configuração da API, ambiente, service/mapper de usuários e modal de detalhes foram preservadas.
+
+Somente arquivos de `locadora_rdt_frontReact` foram alterados. Angular e backend foram mantidos intactos, com conferência de hashes antes e depois.
+
+### Features e rotas adicionadas
+
+| Feature | Rotas | Implementação React |
+|---|---|---|
+| Login | `/login` | `features/identity/login/pages/login-form/LoginForm.tsx` |
+| Ativação de conta | `/activate?token=...` | `features/identity/activate-account/pages/activate-account/ActivateAccount.tsx` |
+| Recuperação de senha | `/password-recovery` | `features/identity/password-recovery/pages/request-password-reset/RequestPasswordReset.tsx` |
+| Redefinição de senha | `/password-recovery/password-reset?token=...` | `features/identity/password-recovery/pages/password-reset/PasswordReset.tsx` |
+| Meu perfil | `/users/profile` | `features/identity/users/pages/user-profile-form/UserProfileForm.tsx` |
+| Configurações do sistema | `/system-settings` | `features/settings/system-settings/pages/system-setting-form/SystemSettingForm.tsx` |
+
+A raiz `/` agora redireciona para `/login`, acompanhando o Angular. Home, usuários, perfis e suas rotas anteriores foram preservados.
+
+### Services, models e DTOs adicionados
+
+- `core/auth`: `auth.service.ts`, `token.service.ts`, `OAuthTokenResponse` e `AuthGuard.tsx`.
+- `activate-account.service.ts`: ativação com token na query string e senha no corpo.
+- `password-recovery.service.ts`: solicitação por e-mail e redefinição com token.
+- `user-profile.service.ts`: consulta/atualização do usuário autenticado, alteração de senha e leitura/upload de foto.
+- `UserMeUpdateDTO`, `ChangePasswordDTO`, `ChangePassword` e `ChangePasswordMapper`; `UserMapper.toMeUpdateDTO` envia somente nome, e-mail, telefone e endereço.
+- `system-setting.service.ts`, `SystemSetting`, `Address`, `SystemSettingDTO`, `SystemSettingUpdateDTO`, `AddressDTO`, `SystemSettingMapper` e catálogo dos mesmos 54 ícones do Angular.
+- `shared/services/SessionContext.tsx`: estado compartilhado de perfil, foto e configurações, usando `useState`/`useEffect`. Substitui a comunicação entre componentes feita pelos services Angular, sem criar outra infraestrutura HTTP.
+
+### Contratos HTTP adicionados
+
+| Método | Endpoint | Dados |
+|---|---|---|
+| POST | `/oauth/token` | Form URL encoded: `username`, `password`, `grant_type=password`; Authorization Basic |
+| POST | `/auth/activate` | Query `token`; corpo `{ password }` |
+| POST | `/auth/request-password-reset` | `{ email }` |
+| POST | `/auth/password-reset` | Query `token`; corpo `{ password }` |
+| GET / PUT | `/user-profile/me` | `UserDTO` / `UserMeUpdateDTO` |
+| PUT | `/user-profile/me/password` | `{ currentPassword, newPassword }` |
+| GET / PUT | `/user-profile/me/photo` | Blob / multipart com campo `file` |
+| GET / PUT | `/system-settings` | `SystemSettingDTO` / `{ companyName, icon, address }` |
+
+A instância Axios existente passou a enviar Bearer token apenas para a origem configurada da API, preservando o Authorization Basic do login. A chave do localStorage é `token`, igual ao Angular. Os erros continuam no interceptor central, incluindo 401/403; ausência de foto (404/204) usa o placeholder.
+
+### Autorização e navegação
+
+- `SYSTEM_SETTING_READ`: acesso à rota de configurações, visibilidade da opção no menu do usuário e consulta das configurações pela sidebar.
+- `SYSTEM_SETTING_WRITE`: visibilidade e execução de Salvar nas configurações.
+- Leitura de authorities do JWT, verificação de expiração, login e logout.
+- Assim como no Angular atual, o guard com authorities está registrado em configurações. Não foram inventadas permissões ou guards adicionais para Home, usuários ou perfis. A autorização efetiva dos endpoints continua sendo responsabilidade do backend.
+- O guard React redireciona para `/login`, que é a rota existente. O guard Angular referencia `/auth/login`, inexistente no seu próprio roteamento; esse endereço quebrado não foi reproduzido.
+- `/not-authorized` usa a página curinga já existente no React. A origem também não implementa uma tela específica para esse endereço.
+
+### Interface e comportamentos atualizados
+
+- Navbar mostra o primeiro nome e a foto do usuário, com menu PrimeReact `OverlayPanel`: Meu perfil, Configurações Sistema e Sair.
+- Perfil salva os dados, depois a senha opcional e depois a foto. Falha de senha mantém o formulário aberto; falha de upload informa atualização parcial e retorna à Home, seguindo a origem.
+- Fotos aceitam JPG, PNG e WEBP até 2 MB, com preview e descarte das URLs de objeto.
+- Nome/foto do perfil e nome/ícone da empresa são atualizados na navbar/sidebar ao salvar, sem refresh.
+- Configurações incluem endereço, limites dos campos, UF em maiúsculas, pesquisa dos 54 ícones e suporte às classes de marcas PlayStation/Xbox. Salvar e Voltar levam à Home.
+- Formulário de usuários valida o preenchimento completo das máscaras de telefone/CEP, como o `ngx-mask` da origem.
+- Modal de permissões mantém o filtro ao mudar de grupo, preservando a seleção entre grupos.
+- Corrigido o envio de `false` na desativação de usuário: o PATCH agora declara JSON, evitando que o Axios envie corpo vazio. URL e contrato booleano foram mantidos.
+- CSS das telas novas foi adaptado do Angular e delimitado por classes de página, para evitar vazamento de estilos em React. Não houve redesign nem inclusão de dependências.
+
+### Revisão final de equivalência
+
+| Área revisada | Resultado |
+|---|---|
+| Home, imagens e responsividade | Preservadas; assets utilizados já eram equivalentes |
+| Usuários | Listagem, filtros, paginação, seleção, exclusões, ativação, detalhes, cadastro/edição e perfis preservados; máscaras e PATCH ajustados |
+| Perfis e permissões | Cadastro, listagem, modal, grupos, filtro e seleção preservados; filtro entre grupos corrigido |
+| Autenticação e recuperação | Telas, token, campos, mensagens principais e chamadas implementados |
+| Meu perfil | Dados, endereço, senha opcional, upload, preview e atualização da navbar implementados |
+| Configurações | Campos, DTOs, leitura/escrita, authorities, busca de ícones, sidebar e navegação implementados |
+| Compartilhados | Tabela, confirmação, mensagens, personalização de colunas e exportação Excel reutilizados |
+| Contratos e rotas | Todas as páginas e campos de models/DTOs da origem possuem equivalentes necessários |
+
+Não foram identificadas features Angular implementadas sem correspondente React após a segunda comparação. Métodos internos de RxJS/ciclo de vida não exigem cópia literal: seus efeitos são realizados com estado React, cleanup e `async/await`.
+
+### Diferenças técnicas e configuração preservada
+
+- A API local do React continua com o fallback preexistente `http://localhost:8081`; use `VITE_API_URL` para apontar para outra porta/ambiente. Não foi trocada indiscriminadamente para a porta do Angular.
+- `VITE_OAUTH_BASIC_AUTH` permite configurar o cabeçalho Basic do cliente OAuth; o fallback acompanha o ambiente Angular de desenvolvimento.
+- CSS é isolado por classes, formulários usam estado React, PrimeNG usa os equivalentes PrimeReact já instalados e services retornam Promises.
+- Erros HTTP são apresentados centralmente, evitando duplicar o toast que a redefinição de senha Angular também apresenta no componente.
+- Botões de envio das telas novas bloqueiam requisições repetidas enquanto salvam.
+- O link `/catalog` da Home continua sem feature de destino porque o Angular também não implementa catálogo.
+- A validação dos campos de usuários/perfil acompanha o Angular: e-mail obrigatório nessas telas; recuperação de senha utiliza o mesmo validador de formato do Angular. Não foram acrescentadas restrições de e-mail ausentes da referência.
+
+### Validação
+
+- `npm run build`: TypeScript e build de produção aprovados. Permanece o aviso de bundle acima de 500 kB, já existente no projeto.
+- Não há script de lint nem framework de testes configurado no `package.json`; nenhuma dependência foi instalada ou atualizada.
+- `node scripts/sync-smoke.mjs`: verificação em Chrome headless com API simulada local, sem acessar o backend real. Usa Node/Vite já instalados; requer Chrome (`CHROME_BIN` pode indicar outro executável compatível).
+- Fluxos verificados: login/Basic/Bearer, sessão/foto ausente, salvar configurações e pesquisar ícones, atualização imediata da sidebar, perfil/senha/upload multipart, atualização da navbar, falha parcial de senha, filtro/seleção entre grupos de permissões, READ/WRITE, Voltar, token expirado, PATCH booleano, ativação, confirmação de senha, recuperação/redefinição, erro HTTP, largura mobile e logout.
+- Integração com o backend real e envio real de e-mail não foram executados. A validação dos contratos e fluxos usa respostas simuladas.
+
+### Ajuste da conexão local após a sincronização
+
+O fallback de `src/environments/environment.ts` foi ajustado de `http://localhost:8081` para `http://localhost:8080`, após confirmar que o backend local escuta na porta 8080. A configuração anterior causava `ERR_CONNECTION_REFUSED` no login. `VITE_API_URL` continua tendo prioridade e a configuração de produção foi preservada.

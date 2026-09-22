@@ -1,12 +1,12 @@
-import { Pagination } from '../models/Pagination';
+import { Pagination } from "../models/Pagination";
 
 export function buildPaginationParams(
   pagination: Pagination,
   filterKey: string,
-  filterValue = '',
+  filterValue = "",
 ): Record<string, string> {
   return {
-    [filterKey]: filterValue || '',
+    [filterKey]: filterValue || "",
     page: String(pagination.page),
     linesPerPage: String(pagination.linesPerPage),
     direction: pagination.direction,

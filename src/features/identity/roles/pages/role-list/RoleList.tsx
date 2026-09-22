@@ -1,35 +1,43 @@
-import { useEffect, useState } from 'react';
-import { Button } from 'primereact/button';
-import { Link } from 'react-router-dom';
-import { PageResponse } from '../../../../../core/models/page-response';
-import { Pagination } from '../../../../../core/models/Pagination';
-import { DataTable, LazyLoadEvent } from '../../../../../shared/components/data-table/DataTable';
-import { DataTableColumn } from '../../../../../shared/components/data-table/models/data-table-column';
-import { NameFilter } from '../../../../../shared/components/name-filter/NameFilter';
-import { RolePermissionsModal } from '../../components/role-permissions-modal/RolePermissionsModal';
-import { RoleDTO } from '../../dtos/role.dto';
-import { RoleMapper } from '../../mappers/role.mapper';
-import { Role } from '../../models/Role';
-import { roleService } from '../../services/role.service';
-import './RoleList.css';
+import { useEffect, useState } from "react";
+import { Button } from "primereact/button";
+import { Link } from "react-router-dom";
+import { PageResponse } from "../../../../../core/models/page-response";
+import { Pagination } from "../../../../../core/models/Pagination";
+import {
+  DataTable,
+  LazyLoadEvent,
+} from "../../../../../shared/components/data-table/DataTable";
+import { DataTableColumn } from "../../../../../shared/components/data-table/models/data-table-column";
+import { NameFilter } from "../../../../../shared/components/name-filter/NameFilter";
+import { RolePermissionsModal } from "../../components/role-permissions-modal/RolePermissionsModal";
+import { RoleDTO } from "../../dtos/role.dto";
+import { RoleMapper } from "../../mappers/role.mapper";
+import { Role } from "../../models/Role";
+import { roleService } from "../../services/role.service";
+import "./RoleList.css";
 
 const columns: DataTableColumn[] = [
-  { field: 'authority', label: 'Nome' },
-  { field: 'permissionsCount', label: 'Qtd. Permissões' },
+  { field: "authority", label: "Nome" },
+  { field: "permissionsCount", label: "Qtd. Permissões" },
 ];
 
 export function RoleList() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
-  const [pagination, setPagination] = useState(new Pagination(0, 5, 'ASC', 'authority'));
+  const [pagination, setPagination] = useState(
+    new Pagination(0, 5, "ASC", "authority"),
+  );
   const [totalElements, setTotalElements] = useState(0);
-  const [filterName, setFilterName] = useState('');
+  const [filterName, setFilterName] = useState("");
   const [loading, setLoading] = useState(false);
   const [permissionsVisible, setPermissionsVisible] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number>();
   const [selectedRoleAuthority, setSelectedRoleAuthority] = useState<string>();
 
-  const list = async (currentPagination: Pagination, currentFilter = filterName) => {
+  const list = async (
+    currentPagination: Pagination,
+    currentFilter = filterName,
+  ) => {
     setLoading(true);
 
     try {
@@ -44,16 +52,17 @@ export function RoleList() {
   };
 
   useEffect(() => {
-    list(new Pagination(0, 5, 'ASC', 'authority'));
+    list(new Pagination(0, 5, "ASC", "authority"));
   }, []);
 
   const changePage = (event: LazyLoadEvent) => {
     const rows = event.rows || pagination.linesPerPage || 1;
     const first = event.first || 0;
-    const direction = event.sortOrder === -1 ? 'DESC' : 'ASC';
-    const orderBy = typeof event.sortField === 'string'
-      ? event.sortField
-      : pagination.orderBy;
+    const direction = event.sortOrder === -1 ? "DESC" : "ASC";
+    const orderBy =
+      typeof event.sortField === "string"
+        ? event.sortField
+        : pagination.orderBy;
     const next = new Pagination(first / rows, rows, direction, orderBy);
 
     setPagination(next);
@@ -61,7 +70,12 @@ export function RoleList() {
   };
 
   const searchRole = (name: string) => {
-    const next = new Pagination(0, pagination.linesPerPage, pagination.direction, pagination.orderBy);
+    const next = new Pagination(
+      0,
+      pagination.linesPerPage,
+      pagination.direction,
+      pagination.orderBy,
+    );
     setFilterName(name);
     setPagination(next);
     list(next, name);
@@ -75,7 +89,12 @@ export function RoleList() {
   };
 
   const reloadRoles = () => {
-    const next = new Pagination(0, pagination.linesPerPage, pagination.direction, pagination.orderBy);
+    const next = new Pagination(
+      0,
+      pagination.linesPerPage,
+      pagination.direction,
+      pagination.orderBy,
+    );
     setPagination(next);
     list(next);
   };
@@ -91,7 +110,7 @@ export function RoleList() {
         className="p-button-rounded p-button-text"
         icon="pi pi-key"
         tooltip="Gerenciar permissões"
-        tooltipOptions={{ position: 'top' }}
+        tooltipOptions={{ position: "top" }}
         onClick={() => openPermissions(role)}
       />
     </div>

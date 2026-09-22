@@ -4,7 +4,7 @@ export class Pagination {
   direction: string;
   orderBy: string;
 
-  constructor(page = 0, linesPerPage = 5, direction = 'ASC', orderBy = 'name') {
+  constructor(page = 0, linesPerPage = 5, direction = "ASC", orderBy = "name") {
     this.page = page;
     this.linesPerPage = linesPerPage;
     this.direction = direction;

@@ -15,5 +15,7 @@ export function removeSelectedId(ids: number[], item?: Identifiable): number[] {
 }
 
 export function getUniqueNumericIds(ids: unknown[]): number[] {
-  return Array.from(new Set(ids)).filter((id): id is number => typeof id === 'number');
+  return Array.from(new Set(ids)).filter(
+    (id): id is number => typeof id === "number",
+  );
 }

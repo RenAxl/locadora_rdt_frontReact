@@ -1,3 +1,11 @@
+import { AuthGuard } from "../core/auth/guards/AuthGuard";
+import { AuthLayout } from "../shell/auth/AuthLayout";
+import { LoginForm } from "../features/identity/login/pages/login-form/LoginForm";
+import { ActivateAccount } from "../features/identity/activate-account/pages/activate-account/ActivateAccount";
+import { RequestPasswordReset } from "../features/identity/password-recovery/pages/request-password-reset/RequestPasswordReset";
+import { PasswordReset } from "../features/identity/password-recovery/pages/password-reset/PasswordReset";
+import { UserProfileForm } from "../features/identity/users/pages/user-profile-form/UserProfileForm";
+import { SystemSettingForm } from "../features/settings/system-settings/pages/system-setting-form/SystemSettingForm";
 import { useEffect, useRef } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ConfirmDialog } from "primereact/confirmdialog";
@@ -28,10 +36,28 @@ export function App() {
         rejectLabel="Não"
       />
       <Routes>
+        <Route element={<AuthLayout />}>
+          <Route index element={<Navigate to="/login" replace />} />
+          <Route path="login" element={<LoginForm />} />
+          <Route path="activate" element={<ActivateAccount />} />
+          <Route path="password-recovery" element={<RequestPasswordReset />} />
+          <Route
+            path="password-recovery/password-reset"
+            element={<PasswordReset />}
+          />
+        </Route>
         <Route element={<MainLayout />}>
-          <Route index element={<Navigate to="/home" replace />} />
           <Route path="home" element={<Home />} />
           <Route path="users" element={<UserList />} />
+          <Route path="users/profile" element={<UserProfileForm />} />
+          <Route
+            path="system-settings"
+            element={
+              <AuthGuard authorities={["SYSTEM_SETTING_READ"]}>
+                <SystemSettingForm />
+              </AuthGuard>
+            }
+          />
           <Route path="users/create" element={<UserForm />} />
           <Route path="users/:userId/edit" element={<UserForm />} />
           <Route path="roles" element={<RoleList />} />

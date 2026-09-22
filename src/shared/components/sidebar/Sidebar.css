@@ -7,7 +7,7 @@
   bottom: 0;
   left: 0;
   z-index: 1050;
-  background-color: #0B1E39 !important;
+  background-color: #0b1e39 !important;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -25,9 +25,9 @@
   font-size: 1.55rem;
   text-shadow:
     -1px -1px 0 #000,
-     1px -1px 0 #000,
-    -1px  1px 0 #000,
-     1px  1px 0 #000;
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 .system-name {
@@ -38,9 +38,9 @@
   white-space: nowrap;
   text-shadow:
     -1px -1px 0 #000,
-     1px -1px 0 #000,
-    -1px  1px 0 #000,
-     1px  1px 0 #000;
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 .sidebar-menu .header {
@@ -69,9 +69,9 @@
   letter-spacing: 0.16em;
   text-shadow:
     -1px -1px 0 #000,
-     1px -1px 0 #000,
-    -1px  1px 0 #000,
-     1px  1px 0 #000;
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 .sidebar-menu .treeview > a {
@@ -98,9 +98,9 @@
     0 0 4px rgba(255, 255, 255, 0.8),
     0 0 6px rgba(255, 255, 255, 0.5),
     -1px -1px 0 #000,
-     1px -1px 0 #000,
-    -1px  1px 0 #000,
-     1px  1px 0 #000;
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 .submenu-toggle-icon.open {

@@ -1,0 +1,55 @@
+.system-setting-form-container {
+  width: 100%;
+}
+
+.system-setting-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.system-setting-form-inputs .form-control {
+  height: 46px;
+}
+
+.system-setting-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.system-setting-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.system-setting-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.system-setting-form-container .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+.system-setting-form-container .loading {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  color: #5f6b7a;
+  font-weight: 600;
+}
+
+@media (min-width: 992px) {
+  .system-setting-form-buttons {
+    justify-content: flex-end;
+  }
+}

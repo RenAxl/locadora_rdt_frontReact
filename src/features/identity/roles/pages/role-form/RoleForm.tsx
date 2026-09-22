@@ -1,12 +1,12 @@
-import { FormEvent, useState } from 'react';
-import { InputText } from 'primereact/inputtext';
-import { Link, useNavigate } from 'react-router-dom';
-import { notificationService } from '../../../../../core/error/services/notification.service';
-import { Message } from '../../../../../shared/components/message/Message';
-import { RoleMapper } from '../../mappers/role.mapper';
-import { Role } from '../../models/Role';
-import { roleService } from '../../services/role.service';
-import './RoleForm.css';
+import { FormEvent, useState } from "react";
+import { InputText } from "primereact/inputtext";
+import { Link, useNavigate } from "react-router-dom";
+import { notificationService } from "../../../../../core/error/services/notification.service";
+import { Message } from "../../../../../shared/components/message/Message";
+import { RoleMapper } from "../../mappers/role.mapper";
+import { Role } from "../../models/Role";
+import { roleService } from "../../services/role.service";
+import "./RoleForm.css";
 
 export function RoleForm() {
   const [role, setRole] = useState(new Role());
@@ -19,11 +19,11 @@ export function RoleForm() {
 
   const normalizeAuthority = (value: string) => {
     let authority = value.trim().toUpperCase();
-    authority = authority.replace(/\s+/g, '_');
-    authority = authority.replace(/[^A-Z0-9_]/g, '');
+    authority = authority.replace(/\s+/g, "_");
+    authority = authority.replace(/[^A-Z0-9_]/g, "");
 
-    if (authority && !authority.startsWith('ROLE_')) {
-      authority = 'ROLE_' + authority;
+    if (authority && !authority.startsWith("ROLE_")) {
+      authority = "ROLE_" + authority;
     }
 
     return authority;
@@ -44,10 +44,10 @@ export function RoleForm() {
 
     try {
       await roleService.insert(RoleMapper.toInsertDTO(roleToInsert));
-      navigate('/roles/');
+      navigate("/roles/");
       notificationService.add({
-        severity: 'success',
-        detail: 'Perfil cadastrado com sucesso!',
+        severity: "success",
+        detail: "Perfil cadastrado com sucesso!",
       });
     } catch {
       // O interceptor HTTP exibe a mensagem de erro.
@@ -69,7 +69,9 @@ export function RoleForm() {
                 placeholder="Nome do Perfil"
                 value={role.authority}
                 maxLength={100}
-                onChange={(event) => setRole(new Role({ ...role, authority: event.target.value }))}
+                onChange={(event) =>
+                  setRole(new Role({ ...role, authority: event.target.value }))
+                }
                 onBlur={() => setTouched(true)}
                 className="form-control"
               />
@@ -95,7 +97,10 @@ export function RoleForm() {
             </button>
 
             <Link to="/roles/">
-              <button type="button" className="btn btn-outline-danger role-form-button">
+              <button
+                type="button"
+                className="btn btn-outline-danger role-form-button"
+              >
                 CANCELAR
               </button>
             </Link>
