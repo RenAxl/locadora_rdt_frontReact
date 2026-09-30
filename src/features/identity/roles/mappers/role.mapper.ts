@@ -12,6 +12,10 @@ export class RoleMapper {
       authority: dto.authority || "",
       permissionsCount: dto.permissionsCount || 0,
       permissions: PermissionMapper.toModelList(dto.permissions || []),
+      createdAt: dto.createdAt,
+      updatedAt: dto.updatedAt,
+      createdBy: dto.createdBy,
+      updatedBy: dto.updatedBy,
     });
   }
 

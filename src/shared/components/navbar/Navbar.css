@@ -7,6 +7,7 @@
   right: 0;
   z-index: 1060;
   padding: 0 0.75rem;
+  transition: left 0.3s ease-in-out;
 }
 
 .main-navbar::before {
@@ -191,7 +192,6 @@
 @media (max-width: 767.98px) {
   .main-navbar {
     left: 0;
-    width: 100%;
   }
 
   .main-navbar::before {
@@ -216,4 +216,15 @@ button.overlay-item {
 button.profile-trigger:hover,
 button.profile-trigger:focus {
   color: #fff;
+}
+
+@media (min-width: 768px) {
+  .navbar-hamburger-desktop { display: inline-flex; }
+  .main-navbar.sidebar-collapsed { left: 0; }
+}
+@media (max-width: 767.98px) {
+  .navbar-hamburger-desktop { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .main-navbar { transition: none; }
 }

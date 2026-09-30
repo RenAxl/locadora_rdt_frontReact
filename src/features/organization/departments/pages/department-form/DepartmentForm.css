@@ -1,0 +1,53 @@
+.department-form-screen .department-form-container {
+  width: 100%;
+}
+
+.department-form-screen .department-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.department-form-screen .department-form-inputs .form-control {
+  height: 46px;
+}
+
+.department-form-screen .department-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.department-form-screen .department-form-inputs .textarea-description {
+  height: auto;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.department-form-screen .department-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.department-form-screen .department-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.department-form-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+@media (min-width: 992px) {
+  .department-form-screen .department-form-buttons {
+    justify-content: flex-end;
+  }
+}

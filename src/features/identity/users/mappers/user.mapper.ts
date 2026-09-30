@@ -1,5 +1,4 @@
 import { UserMeUpdateDTO } from "../dtos/user-me-update-dto";
-import { UserDetailsDTO } from "../dtos/user-details-dto";
 import { UserDTO } from "../dtos/user-dto";
 import { UserInsertDTO } from "../dtos/user-insert-dto";
 import { UserUpdateDTO } from "../dtos/user-update-dto";
@@ -24,14 +23,6 @@ export class UserMapper {
         zipCode: dto.address?.zipCode || "",
       }),
       photoContentType: dto.photoContentType,
-      roleIds: [],
-      roles: [],
-    });
-  }
-
-  static toDetailsModel(dto: UserDetailsDTO): User {
-    return new User({
-      ...this.toModel(dto),
       roleIds: dto.roleIds || [],
       roles: dto.roles || [],
       createdAt: dto.createdAt,

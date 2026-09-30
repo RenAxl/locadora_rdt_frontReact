@@ -33,7 +33,7 @@ export function ActivateAccount() {
       });
       navigate("/login");
     } catch {
-      // O interceptor HTTP exibe o erro.
+      
     } finally {
       setLoading(false);
     }

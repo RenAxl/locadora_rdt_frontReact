@@ -157,3 +157,39 @@
     overflow-y: auto;
   }
 }
+
+.sidebar.offcanvas-md {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.3s ease-in-out, top 0.3s ease-in-out,
+    visibility 0s;
+}
+
+@media (min-width: 768px) {
+  .sidebar.offcanvas-md.sidebar-collapsed {
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition-delay: 0s, 0s, 0.3s;
+  }
+}
+
+
+@media (max-width: 767.98px) {
+  .sidebar.offcanvas-md {
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition-delay: 0s, 0s, 0.3s;
+  }
+
+  .sidebar.offcanvas-md.showing,
+  .sidebar.offcanvas-md.show:not(.hiding) {
+    transform: translateX(0);
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar.offcanvas-md { transition: none; }
+}

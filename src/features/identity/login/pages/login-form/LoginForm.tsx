@@ -25,7 +25,7 @@ export function LoginForm() {
       });
       navigate("/home");
     } catch {
-      // O interceptor HTTP exibe o erro.
+      
     } finally {
       setLoading(false);
     }
@@ -79,6 +79,9 @@ export function LoginForm() {
             </div>
             <div className="forgot-password">
               <Link to="/password-recovery">Esqueceu a senha?</Link>
+            </div>
+            <div className="forgot-password">
+              <Link to="/customer-account/register">Ainda não é um cliente?</Link>
             </div>
             <button
               type="submit"

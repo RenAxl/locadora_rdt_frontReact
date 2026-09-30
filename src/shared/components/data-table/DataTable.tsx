@@ -17,22 +17,25 @@ export interface LazyLoadEvent {
 interface DataTableProps<T extends { id?: number; active?: boolean }> {
   records: T[];
   columns: DataTableColumn[];
-  selectedRecords: T[];
-  totalRecords: number;
-  rows: number;
+  selectedRecords?: T[];
+  showSelection?: boolean;
+  paginator?: boolean;
+  rowSelectable?: (record: T) => boolean;
+  totalRecords?: number;
+  rows?: number;
   loading: boolean;
   emptyMessage?: string;
   columnTemplates?: Record<string, (record: T) => React.ReactNode>;
   actionsTemplate?: (record: T) => React.ReactNode;
   showColumnsButton?: boolean;
   showExportButton?: boolean;
-  exportTitle: string;
-  exportFileName: string;
-  exportPagination: Pagination;
-  exportLoadRecords: (pagination: Pagination) => Promise<PageResponse<any>>;
-  onLazyLoad: (event: LazyLoadEvent) => void;
-  onSelectedRecordsChange: (records: T[]) => void;
-  onColumnsButtonClick: () => void;
+  exportTitle?: string;
+  exportFileName?: string;
+  exportPagination?: Pagination;
+  exportLoadRecords?: (pagination: Pagination) => Promise<PageResponse<any>>;
+  onLazyLoad?: (event: LazyLoadEvent) => void;
+  onSelectedRecordsChange?: (records: T[]) => void;
+  onColumnsButtonClick?: () => void;
 }
 
 export function DataTable<T extends { id?: number; active?: boolean }>(
@@ -50,7 +53,7 @@ export function DataTable<T extends { id?: number; active?: boolean }>(
   const bodyFor = (column: DataTableColumn) => (record: T) => {
     if (props.columnTemplates?.[column.field])
       return props.columnTemplates[column.field](record);
-    return getFieldValue(record, column.field);
+    return <span className="table-cell-value">{getFieldValue(record, column.field)}</span>;
   };
 
   return (
@@ -67,13 +70,13 @@ export function DataTable<T extends { id?: number; active?: boolean }>(
               onClick={props.onColumnsButtonClick}
             />
           )}
-          {props.showExportButton && (
+          {props.showExportButton && props.exportLoadRecords && (
             <ExcelExport
-              title={props.exportTitle}
-              fileName={props.exportFileName}
+              title={props.exportTitle || ""}
+              fileName={props.exportFileName || ""}
               fields={props.columns}
-              pagination={props.exportPagination}
-              totalRecords={props.totalRecords}
+              pagination={props.exportPagination || new Pagination()}
+              totalRecords={props.totalRecords || 0}
               loadRecords={props.exportLoadRecords}
             />
           )}
@@ -85,30 +88,40 @@ export function DataTable<T extends { id?: number; active?: boolean }>(
         dataKey="id"
         className="global-table"
         lazy
-        paginator
+        paginator={props.paginator !== false}
         selectionMode="multiple"
+        isDataSelectable={(event) =>
+          props.showSelection !== false &&
+          (!props.rowSelectable || props.rowSelectable(event.data as T))
+        }
         responsiveLayout="stack"
         breakpoint="991px"
-        first={props.exportPagination.page * props.rows}
-        rows={props.rows}
-        totalRecords={props.totalRecords}
+        first={(props.exportPagination?.page || 0) * (props.rows || 5)}
+        rows={props.rows || 5}
+        totalRecords={props.totalRecords || 0}
         loading={props.loading}
-        selection={props.selectedRecords}
+        selection={props.selectedRecords || []}
         emptyMessage={props.emptyMessage}
         rowClassName={(record) =>
           record.active === false ? "row-inactive" : ""
         }
         onSelectionChange={(event) =>
-          props.onSelectedRecordsChange(event.value as unknown as T[])
+          props.onSelectedRecordsChange?.(
+            (event.value as unknown as T[]).filter(
+              (record) => !props.rowSelectable || props.rowSelectable(record),
+            ),
+          )
         }
-        onPage={(event) => props.onLazyLoad(event)}
-        onSort={(event) => props.onLazyLoad(event)}
+        onPage={(event) => props.onLazyLoad?.(event)}
+        onSort={(event) => props.onLazyLoad?.(event)}
       >
-        <Column
-          selectionMode="multiple"
-          headerStyle={{ width: "48px" }}
-          className="selection-column"
-        />
+        {props.showSelection !== false && (
+          <Column
+            selectionMode="multiple"
+            headerStyle={{ width: "48px" }}
+            className="selection-column"
+          />
+        )}
         {props.columns.map((column) => (
           <Column
             key={column.field}

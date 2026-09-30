@@ -293,3 +293,202 @@ Não foram identificadas features Angular implementadas sem correspondente React
 ### Ajuste da conexão local após a sincronização
 
 O fallback de `src/environments/environment.ts` foi ajustado de `http://localhost:8081` para `http://localhost:8080`, após confirmar que o backend local escuta na porta 8080. A configuração anterior causava `ERR_CONNECTION_REFUSED` no login. `VITE_API_URL` continua tendo prioridade e a configuração de produção foi preservada.
+
+## Sincronização com Angular - 23/09/2026
+
+Atualização incremental baseada no estado atual de `../locadora_rdt_frontend`, incluindo o histórico até `78acf9d` e os arquivos presentes no diretório de trabalho. O React existente foi preservado como referência arquitetural. Esta seção atualiza as observações históricas sobre ausência de clientes, cadastro público e guards.
+
+### Comparação inicial
+
+Foram comparados estrutura, páginas, componentes, rotas, guards, authorities, menus, DTOs, models, mappers, métodos HTTP, parâmetros, arquivos binários, formulários, validações, estilos, assets e componentes compartilhados. O histórico Git ajudou a localizar mudanças, mas os contratos e comportamentos foram conferidos no código atual.
+
+Diferenças encontradas:
+
+- O React não possuía a feature `organization/customers`: CRUD, fotos, detalhes, anexos e exportação de clientes.
+- O React não possuía `identity/customer-account`: cadastro público, criação de senha e reenvio de ativação.
+- Faltavam as proteções atuais das rotas de usuários, perfis e clientes, a página `not-authorized` e o destino explícito `page-not-found`.
+- O menu não refletia as regras atuais de visibilidade e não tinha Organização / Clientes.
+- A listagem de usuários não recebia as roles nem impedia selecionar/excluir quem tem `ROLE_ADMINISTRADOR`.
+- A tabela compartilhada precisava oferecer seleção opcional, seleção condicionada e paginação opcional.
+- O interceptor precisava excluir as três chamadas públicas de cadastro do envio de Bearer token.
+
+As alterações locais anteriores em ambiente, login, ativação, redefinição de senha e modal de permissões foram preservadas. Nenhuma dependência foi instalada ou atualizada.
+
+### Features adicionadas
+
+**Clientes (`organization/customers`)**
+
+- Listagem com filtro por nome, paginação, seleção entre páginas, exclusão individual/em lote, ativação/desativação, personalização de colunas e exportação Excel pela infraestrutura existente.
+- Cadastro/edição com nome, CPF, e-mail, telefone, endereço e foto. Nome mínimo de cinco caracteres, campos obrigatórios e máscaras de telefone/CEP seguem a referência.
+- Upload de foto separado do salvamento; falha da foto informa o cadastro/atualização parcial, como no Angular.
+- Modal de detalhes com endereço, auditoria, situação e foto.
+- Modal de arquivos com nome, seleção de arquivo, preview de imagens, envio multipart, listagem, visualização de imagem/PDF, download e exclusão com confirmação.
+- Download preserva o nome original ou o nome fornecido em `Content-Disposition`, incluindo UTF-8.
+- URLs de objeto são liberadas ao trocar arquivo, fechar modal ou desmontar os componentes.
+
+**Conta de cliente (`identity/customer-account`)**
+
+- Cadastro público com os mesmos onze campos, payload plano, validações de CPF/e-mail/UF e mensagens.
+- Redirecionamento após cadastro para reenvio de ativação com e-mail preenchido pela query string.
+- Criação de senha com token na query, mínimo de seis caracteres, confirmação e aviso de token ausente.
+- Reenvio de ativação com validação de e-mail e mensagem de sucesso.
+- Layout do Angular atual: fundo lilás, cartão branco, ícones nos inputs, botões e grid responsivo do cadastro. CSS delimitado por classes para reproduzir o isolamento de estilos do Angular.
+- Link “Ainda não é um cliente?” no login.
+
+### Rotas e permissões
+
+| Rota | Regra |
+|---|---|
+| `/customer-account` | Redireciona para `/customer-account/register` |
+| `/customer-account/register` | Pública |
+| `/customer-account/create-password?token=...` | Pública |
+| `/customer-account/resend?email=...` | Pública |
+| `/customers` | `CUSTOMER_READ` |
+| `/customers/create` | `CUSTOMER_WRITE` |
+| `/customers/:customerId/edit` | `CUSTOMER_WRITE` |
+| `/users` | `USER_READ` |
+| `/users/create`, `/users/:userId/edit` | `USER_WRITE` |
+| `/users/profile` | `USER_PROFILE_READ` |
+| `/roles` | `ROLE_READ` |
+| `/roles/create` | `ROLE_WRITE` |
+| `/system-settings` | `SYSTEM_SETTING_READ` (preservada) |
+| `/not-authorized` | Página “Acesso negado!” |
+| `/page-not-found` e rota curinga | Página não encontrada |
+
+- Sessão inválida leva ao login com `returnUrl`; falta de authority leva à página de acesso negado com aviso.
+- Clientes: leitura permite detalhes/anexos/download; escrita permite criar/editar/alterar situação/enviar arquivos; exclusão permite excluir clientes/arquivos e selecionar clientes em lote.
+- Usuários: `ROLE_ADMINISTRADOR` ou `USER_DELETE` habilita exclusão, mas um alvo com `ROLE_ADMINISTRADOR` permanece protegido mesmo quando possui outras roles. A regra vale para botão individual e seleção em lote; o backend continua responsável pela autorização definitiva.
+- A visibilidade dos grupos Administração e Organização e do item Perfis acompanha o Angular atual. Não foram criadas permissões novas no backend.
+
+### Services, models, DTOs e mappers
+
+- `customer.service.ts`: listagem, consulta, inserção, atualização, exclusão individual/em lote, situação e foto.
+- `customer-file.service.ts`: listagem, envio, visualização, download com cabeçalhos e exclusão de anexos.
+- `customer-account.service.ts`: cadastro, criação de senha e reenvio de ativação.
+- Models `Customer`, `CustomerFile`, `Address`, `CustomerAccountRegistration`, `CustomerAccountPassword` e `CustomerAccountResend`.
+- DTOs de cliente (listagem, detalhes, inserção, atualização, endereço e arquivo) e os três DTOs de conta de cliente; respectivos mappers no padrão `mappers` já existente no React.
+- `UserDTO.roles` e `UserMapper.toModel` atualizados para refletir as roles da listagem.
+
+### Contratos HTTP acrescentados
+
+| Método | Endpoint | Contrato |
+|---|---|---|
+| GET / POST | `/customers` | Paginação/filtro `name` / `CustomerInsertDTO` |
+| GET / PUT / DELETE | `/customers/{id}` | Detalhes / `CustomerUpdateDTO` / exclusão |
+| DELETE | `/customers/all` | Array de IDs no corpo |
+| PATCH | `/customers/{id}/active` | Booleano JSON, inclusive `false` |
+| GET / PUT | `/customers/{id}/photo` | Blob / multipart com `file` |
+| GET / POST | `/customers/{id}/files` | Lista / multipart com `name` e `file` |
+| DELETE | `/customers/{id}/files/{fileId}` | Exclusão |
+| GET | `/customers/{id}/files/{fileId}/view` | Blob para visualização |
+| GET | `/customers/{id}/files/{fileId}/download` | Blob e cabeçalhos |
+| POST | `/customer-accounts` | `CustomerAccountRegistrationDTO` |
+| POST | `/customer-accounts/create-password?token=...` | `{ password, passwordConfirmation }` |
+| POST | `/customer-accounts/resend-activation` | `{ email }` |
+
+Todos os services usam a instância Axios existente. As três rotas públicas de conta de cliente não recebem JWT do armazenamento, inclusive quando há token antigo. Login continua enviando Basic. O tratamento central de erros foi preservado.
+
+### Segunda comparação e validação
+
+| Área | Resultado da revisão final |
+|---|---|
+| Páginas, rotas e redirecionamentos | Todas as páginas Angular atuais possuem equivalente React; paths e authorities conferidos |
+| Clientes e contas públicas | Campos, validações, payloads, mensagens, ações e destinos conferidos com as telas Angular |
+| Usuários, perfis e permissões | Funcionalidades anteriores preservadas; guards e proteção de administradores sincronizados |
+| Home, perfil e configurações | Mantidos; verificados fluxos de perfil/senha/foto, nome da empresa, ícones e READ/WRITE |
+| Services e contratos | Endpoints, verbos, query params, corpos, multipart e blobs comparados novamente |
+| Compartilhados | Tabela, filtro, confirmação, mensagens, personalização e Excel reutilizados; tabela ampliada apenas para as capacidades presentes no Angular |
+| CSS e assets | Estilos das telas novas adaptados sem redesign; imagens existentes têm hashes iguais às do Angular |
+| Dependências | Nenhuma alteração; não há script de lint no `package.json` |
+
+- `npm run build`: TypeScript e build de produção aprovados. Permanece o aviso de tamanho de bundle, já existente.
+- `node scripts/sync-smoke.mjs`: testes de navegador com Chrome e API simulada, ampliados para cadastro público, guards, menus, proteção de administradores, CRUD de clientes, fotos, filtros, paginação, seleção entre páginas, exportação, upload/visualização/download/exclusão de anexos e responsividade.
+- O mesmo script continua verificando login/JWT, configurações, perfil/senha/foto, permissões, recuperação de senha, erros HTTP e logout.
+- `SYNC_SCREENSHOTS=1 node scripts/sync-smoke.mjs` salva capturas opcionais em `node_modules/.sync-screenshots`, sem acrescentar dependências.
+- Angular e backends não foram alterados; hashes dos arquivos de origem foram conferidos antes/depois.
+
+### Diferenças técnicas preservadas
+
+React usa estado local, efeitos com cleanup, services async/await e componentes PrimeReact. Não há cópia de módulos/decorators/RxJS; models e DTOs TypeScript mantêm os contratos. CSS recebe prefixos de tela para evitar vazamento global. O ambiente React preexistente e suas variáveis continuam preservados. Home continua sem guard específico e `/catalog` continua sem implementação, assim como na referência. Os testes não enviam e-mails nem gravam dados no backend real.
+
+## Sincronização com Angular - 29/09/2026
+
+Atualização incremental do React existente usando o estado atual de `../locadora_rdt_frontend` (HEAD `03a013c`) como referência funcional. O conteúdo anterior deste documento e as alterações locais anteriores do React foram preservados. Nenhum arquivo Angular ou dos backends foi editado.
+
+### Comparação inicial
+
+A análise cobriu os dois projetos: rotas e guards, autenticação/JWT, autorização, menus, páginas, formulários, validações, models/DTOs, mappers, services, contratos HTTP, componentes compartilhados, exportação, fotos/anexos, CSS e assets. O histórico Git foi usado apenas como apoio; a implementação foi baseada nos arquivos atuais.
+
+As diferenças principais eram os módulos de departamentos, cargos, funcionários e fornecedores ausentes no React; campos de auditoria não mapeados nas listagens existentes; e mudanças recentes na tabela mobile, anexos e sidebar. As funcionalidades já equivalentes de login, conta pública de cliente, ativação, recuperação de senha, perfil, configurações, usuários, clientes e permissões foram mantidas.
+
+### Features adicionadas
+
+- **Departamentos:** listagem paginada, filtro por nome, personalização de campos, exportação Excel, cadastro/edição de nome e descrição, detalhes com auditoria, exclusão individual e de selecionados. A exclusão em lote faz DELETE sequencial, interrompe em caso de erro e recarrega os registros restantes, como no Angular. A seleção é da página atual.
+- **Cargos:** listagem, filtro, paginação, colunas personalizadas, Excel, cadastro/edição de nome, detalhes e exclusão individual. O mapper remove espaços nas extremidades do nome; o PUT inclui o ID no corpo. Não foi acrescentada exclusão em lote, inexistente na referência.
+- **Funcionários:** listagem, seleção entre páginas, exclusão individual/em lote, ativação/desativação, detalhes, filtro, paginação, personalização e Excel. Formulário com matrícula, contato, endereço, salário em BRL, tipo de contratação, cargo, departamento, admissão, desligamento e foto. Mantidas obrigatoriedades, tamanho mínimo, consulta dos relacionamentos e proibição de desligamento anterior à admissão. Cargo/departamento são enviados como IDs; salário ausente e desligamento vazio são enviados como `null`.
+- **Fornecedores:** listagem, filtro, paginação, personalização, Excel, detalhes e exclusão individual. Cadastro/edição com nome, nome fantasia, razão social, e-mail, telefone fixo/celular, CNPJ, endereço e imagem. Preservadas máscaras, obrigatoriedades, nomes dos campos e normalização de e-mail Markdown no mapper. Sem ações de ativação ou exclusão em lote, pois não existem no Angular.
+- **Arquivos de funcionários e fornecedores:** modais de listagem/envio, nome do arquivo, preview de imagem, visualização de imagem/PDF, download com nome de `Content-Disposition`, exclusão confirmada e descarte das URLs de objeto. Fotos e imagens são enviadas separadamente do cadastro, com aviso de sucesso parcial quando o upload falha.
+
+Foram adicionadas oito páginas e seis componentes de detalhes/arquivos, seguindo as features React já existentes. Foram reutilizados `DataTable`, `NameFilter`, `FieldCustomization`, `ExcelExport`, `Message`, confirmação, notificações e a instância Axios central. `InputNumber` e `InputTextarea` usam o PrimeReact já instalado.
+
+### Rotas e permissões adicionadas ao React
+
+| Rotas | Authorities |
+|---|---|
+| `/departments`, `/departments/create`, `/departments/:departmentId/edit` | `DEPARTMENT_READ` para listar; `DEPARTMENT_WRITE` para criar/editar |
+| `/positions`, `/positions/create`, `/positions/:positionId/edit` | `POSITION_READ` para listar; `POSITION_WRITE` para criar/editar |
+| `/employees`, `/employees/create`, `/employees/:employeeId/edit` | `EMPLOYEE_READ` para listar; `EMPLOYEE_WRITE` para criar/editar |
+| `/suppliers`, `/suppliers/create`, `/suppliers/:supplierId/edit` | `SUPPLIER_READ` para listar; `SUPPLIER_WRITE` para criar/editar |
+
+Cada módulo usa também sua authority `*_DELETE` para exclusão; funcionários e fornecedores usam READ/WRITE/DELETE nos anexos. Os novos itens e a condição de visibilidade do grupo Organização seguem o Angular. Nenhuma permissão foi criada ou alterada no backend.
+
+### Services, models e DTOs
+
+- Services: `department.service.ts`, `position.service.ts`, `employee.service.ts`, `employee-file.service.ts`, `supplier.service.ts` e `supplier-file.service.ts`.
+- Models: `Department`, `Position`, `Employee`, `EmployeeFile`, `Supplier`, `SupplierFile` e `Address` de fornecedor.
+- DTOs de consulta, inserção e atualização das quatro entidades; DTOs de arquivo para funcionário/fornecedor e endereço para fornecedor. Os mappers correspondentes preservam os campos, valores iniciais, datas e contratos da referência.
+- Usuários, clientes e perfis: DTOs e mappers de listagem agora preservam auditoria; usuários também preservam `roleIds`. Os tipos/métodos de detalhes existentes no React continuam disponíveis, sem reescrita desnecessária dos consumidores.
+
+### Contratos HTTP acrescentados
+
+| Método | Endpoint | Observação |
+|---|---|---|
+| GET / POST | `/departments`, `/positions`, `/employees`, `/suppliers` | Paginação e filtro `name`; DTO de inserção específico |
+| GET / PUT / DELETE | `/{departments,positions,employees,suppliers}/{id}` | Consulta, atualização e exclusão; departamento recebe ID somente na URL do PUT |
+| DELETE | `/employees/all` | Array de IDs no corpo |
+| PATCH | `/employees/{id}/active` | Booleano JSON, incluindo `false` |
+| GET / PUT | `/employees/{id}/photo` | Blob / multipart com `file` |
+| GET / PUT | `/suppliers/{id}/image` | Blob / multipart com `file` |
+| GET / POST | `/{employees,suppliers}/{id}/files` | Lista / multipart com `name` e `file` |
+| DELETE | `/{employees,suppliers}/{id}/files/{fileId}` | Exclusão do anexo |
+| GET | `/{employees,suppliers}/{id}/files/{fileId}/view` | Blob para visualização |
+| GET | `/{employees,suppliers}/{id}/files/{fileId}/download` | Blob e cabeçalhos de download |
+
+As novas chamadas usam os mesmos parâmetros de paginação, JWT, tratamento de erros e configuração de ambiente existentes no React. Não houve mudança de URL de ambiente, contrato de API, versão de biblioteca ou instalação de dependência.
+
+### Componentes e comportamento visual atualizados
+
+- Tabela global em telas de até 767px: rótulo acima do valor, alinhamento à esquerda, largura disponível para valores e ações agrupadas à esquerda. A regra é global, sem exceção específica para clientes.
+- Arquivos de cliente/funcionário/fornecedor: nome do arquivo em linha própria com margem superior de 8px até 575,98px.
+- Navbar com botão hambúrguer a partir de 768px, estado booleano no `MainLayout` e props simples para navbar/sidebar.
+- Sidebar desliza em 300ms; navbar e conteúdo acompanham a transição, inclusive ao mudar de breakpoint. O offcanvas do Bootstrap permanece no mobile e a preferência de movimento reduzido é respeitada.
+- Estilos dos módulos novos foram adaptados com prefixos de tela/dialog para reproduzir o isolamento do Angular sem afetar outras páginas.
+- Assets conferidos por conteúdo: imagens e ícones estáticos continuam iguais aos da referência.
+
+### Segunda comparação e validação
+
+A revisão final voltou a comparar todas as páginas/componentes de feature, campos de models/DTOs, colunas, rotas/authorities, endpoints e verbos HTTP. Não foram encontrados equivalentes faltantes nessas categorias. Também foram reconferidos os formulários, máscaras, payloads, detalhes, anexos, exportação e layout responsivo.
+
+- `npm run build`: TypeScript e build de produção aprovados. Permanece o aviso de tamanho do bundle do Vite; não houve atualização de bibliotecas nem mudança arquitetural para contorná-lo.
+- O projeto não possui script de lint configurado.
+- `scripts/sync-smoke.mjs` ampliado com Chrome e API simulada: regressão das features existentes e cobertura dos quatro módulos novos, guards, visibilidade das ações, CRUD, auditoria, filtros, exportação, máscaras, salário, relacionamentos, datas, fotos/imagens, anexos, downloads e exclusões.
+- Inclui exclusão de funcionários selecionados em páginas diferentes e falha parcial durante exclusão sequencial de departamentos.
+- Validação responsiva de tabelas/formulários em 390, 767, 768 e 1024px, alternância da sidebar no desktop/mobile e transições entre breakpoints.
+- Capturas opcionais: `SYNC_SCREENSHOTS=1 node scripts/sync-smoke.mjs`, salvas em `node_modules/.sync-screenshots`.
+- A integração foi exercitada com respostas simuladas; não foram enviados e-mails nem alterados dados no backend real.
+- Conferência de integridade: hashes de 655 arquivos dos projetos de referência e backends permaneceram idênticos antes/depois da atualização.
+- O CSS mobile foi validado também pelo alinhamento calculado no navegador, com prioridade suficiente sobre as regras dinâmicas do PrimeReact.
+
+### Diferenças técnicas preservadas
+
+React continua usando estado local, efeitos com cleanup, services async/await e PrimeReact. Classes TypeScript de dados seguem os contratos do Angular sem decorators ou RxJS. Os nomes de DTOs de detalhes já existentes no React foram mantidos onde não havia diferença funcional. A sidebar React continua ajustando a margem do conteúdo porque renderiza o `aside` diretamente, enquanto o Angular reserva largura no elemento do componente; o resultado visual acompanha a referência.

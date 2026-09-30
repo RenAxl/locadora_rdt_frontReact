@@ -3,7 +3,6 @@ import { httpClient } from "../../../../core/http/interceptors/http-client";
 import { PageResponse } from "../../../../core/models/page-response";
 import { Pagination } from "../../../../core/models/Pagination";
 import { buildPaginationParams } from "../../../../core/utils/pagination-params.util";
-import { UserDetailsDTO } from "../dtos/user-details-dto";
 import { UserDTO } from "../dtos/user-dto";
 import { UserInsertDTO } from "../dtos/user-insert-dto";
 import { UserUpdateDTO } from "../dtos/user-update-dto";
@@ -26,8 +25,8 @@ export const userService = {
     return response.data;
   },
 
-  async findById(id: number | string): Promise<UserDetailsDTO> {
-    const response = await httpClient.get<UserDetailsDTO>(API.USERS.BY_ID(id));
+  async findById(id: number | string): Promise<UserDTO> {
+    const response = await httpClient.get<UserDTO>(API.USERS.BY_ID(id));
     return response.data;
   },
 

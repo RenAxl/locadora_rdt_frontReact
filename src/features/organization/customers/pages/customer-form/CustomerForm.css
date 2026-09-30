@@ -1,0 +1,160 @@
+.customer-form-screen .customer-form-container {
+  width: 100%;
+}
+
+.customer-form-screen .customer-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.customer-form-screen .customer-form-inputs .form-control {
+  height: 46px;
+}
+
+.customer-form-screen .customer-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.customer-form-screen .customer-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.customer-form-screen .customer-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.customer-form-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+@media (min-width: 992px) {
+  .customer-form-screen .customer-form-buttons {
+    justify-content: flex-end;
+  }
+}
+
+.customer-form-screen .customer-photo-header {
+  margin-bottom: 18px;
+}
+
+.customer-form-screen .customer-photo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.customer-form-screen .customer-photo-frame {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+  flex: 0 0 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customer-form-screen .customer-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.customer-form-screen .customer-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
+}
+
+.customer-form-screen .customer-photo-icon {
+  font-size: 34px;
+  opacity: 0.55;
+}
+
+.customer-form-screen .customer-photo-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.customer-form-screen .customer-photo-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.customer-form-screen .customer-photo-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+
+.customer-form-screen .customer-photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.customer-form-screen .upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.15s ease;
+}
+
+.customer-form-screen .upload-btn:hover {
+  transform: translateY(-1px);
+}
+
+.customer-form-screen .upload-btn:active {
+  transform: translateY(0px);
+}
+
+.customer-form-screen .upload-btn-icon {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.customer-form-screen .upload-input {
+  display: none;
+}
+
+.customer-form-screen .file-chip {
+  max-width: 280px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

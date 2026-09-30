@@ -6,7 +6,12 @@ import { notificationService } from "../../../core/error/services/notification.s
 import { SessionContext } from "../../services/SessionContext";
 import "./Navbar.css";
 
-export function Navbar() {
+interface NavbarProps {
+  sidebarCollapsed: boolean;
+  onSidebarToggle: () => void;
+}
+
+export function Navbar({ sidebarCollapsed, onSidebarToggle }: NavbarProps) {
   const { profile, photo } = useContext(SessionContext);
   const [photoUrl, setPhotoUrl] = useState("");
   const userMenu = useRef<OverlayPanel>(null);
@@ -32,7 +37,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="navbar main-navbar shadow">
+    <nav className={`navbar main-navbar shadow${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
       <div className="container-fluid h-100 d-flex align-items-center">
         <button
           className="btn navbar-hamburger"
@@ -43,6 +48,11 @@ export function Navbar() {
           aria-controls="sidebarOffcanvas"
         >
           <i className="fa-solid fa-bars" />
+        </button>
+        <button className="btn navbar-hamburger navbar-hamburger-desktop" type="button"
+          aria-label={sidebarCollapsed ? "Abrir menu" : "Fechar menu"} aria-expanded={!sidebarCollapsed}
+          aria-controls="sidebarOffcanvas" onClick={onSidebarToggle}>
+          <i className="fa-solid fa-bars" aria-hidden="true" />
         </button>
         <button
           type="button"

@@ -1,9 +1,10 @@
+import { authService } from "../../../core/auth/services/auth.service";
 import { useContext } from "react";
 import { SessionContext } from "../../services/SessionContext";
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 
-export function Sidebar() {
+export function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
   const { setting } = useContext(SessionContext);
   const iconType =
     setting.icon === "fa-playstation" || setting.icon === "fa-xbox"
@@ -12,7 +13,7 @@ export function Sidebar() {
   return (
     <aside
       id="sidebarOffcanvas"
-      className="sidebar offcanvas-md offcanvas-start d-flex flex-column"
+      className={`sidebar offcanvas-md offcanvas-start d-flex flex-column${collapsed ? " sidebar-collapsed" : ""}`}
       tabIndex={-1}
       aria-labelledby="sidebarOffcanvasLabel"
     >
@@ -41,46 +42,89 @@ export function Sidebar() {
               <span>Home</span>
             </NavLink>
           </li>
-          <li className="treeview">
-            <a
-              className="d-flex align-items-center justify-content-between nav-link px-3 collapsed"
-              data-bs-toggle="collapse"
-              data-bs-target="#submenuAdministracaoDesktop"
-              href="#administracao"
-            >
-              <span className="d-flex align-items-center">
-                <i className="fa-solid fa-user-shield me-2" />
-                <span>Administração</span>
-              </span>
-              <span>
-                <i className="fa-solid fa-caret-right submenu-toggle-icon closed" />
-                <i className="fa-solid fa-caret-down submenu-toggle-icon open" />
-              </span>
-            </a>
-            <ul
-              className="treeview-menu collapse list-unstyled mb-0"
-              id="submenuAdministracaoDesktop"
-            >
-              <li>
-                <NavLink
-                  to="/users"
-                  className="d-flex align-items-center nav-link px-4"
-                >
-                  <i className="fa-solid fa-user me-2" />
-                  <span>Usuários</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/roles"
-                  className="d-flex align-items-center nav-link px-4"
-                >
+          {authService.hasAnyAuthority(["USER_READ", "ROLE_READ"]) && (
+            <li className="treeview">
+              <a
+                className="d-flex align-items-center justify-content-between nav-link px-3 collapsed"
+                data-bs-toggle="collapse"
+                data-bs-target="#submenuAdministracaoDesktop"
+                href="#administracao"
+              >
+                <span className="d-flex align-items-center">
                   <i className="fa-solid fa-user-shield me-2" />
-                  <span>Perfis</span>
-                </NavLink>
-              </li>
-            </ul>
-          </li>
+                  <span>Administração</span>
+                </span>
+                <span>
+                  <i className="fa-solid fa-caret-right submenu-toggle-icon closed" />
+                  <i className="fa-solid fa-caret-down submenu-toggle-icon open" />
+                </span>
+              </a>
+              <ul
+                className="treeview-menu collapse list-unstyled mb-0"
+                id="submenuAdministracaoDesktop"
+              >
+                <li>
+                  <NavLink
+                    to="/users"
+                    className="d-flex align-items-center nav-link px-4"
+                  >
+                    <i className="fa-solid fa-user me-2" />
+                    <span>Usuários</span>
+                  </NavLink>
+                </li>
+                {authService.hasAuthority("ROLE_READ") && (
+                  <li>
+                    <NavLink
+                      to="/roles"
+                      className="d-flex align-items-center nav-link px-4"
+                    >
+                      <i className="fa-solid fa-user-shield me-2" />
+                      <span>Perfis</span>
+                    </NavLink>
+                  </li>
+                )}
+              </ul>
+            </li>
+          )}
+          {authService.hasAnyAuthority(["CUSTOMER_READ", "DEPARTMENT_READ", "EMPLOYEE_READ"]) && (
+            <li className="treeview">
+              <a
+                className="d-flex align-items-center justify-content-between nav-link px-3 collapsed"
+                data-bs-toggle="collapse"
+                data-bs-target="#submenuOrganizationDesktop"
+                href="#organizacao"
+              >
+                <span className="d-flex align-items-center">
+                  <i className="fa-solid fa-building me-2" />
+                  <span>Organização</span>
+                </span>
+                <span>
+                  <i className="fa-solid fa-caret-right submenu-toggle-icon closed" />
+                  <i className="fa-solid fa-caret-down submenu-toggle-icon open" />
+                </span>
+              </a>
+              <ul
+                className="treeview-menu collapse list-unstyled mb-0"
+                id="submenuOrganizationDesktop"
+              >
+                {authService.hasAuthority("CUSTOMER_READ") && (
+                  <li><NavLink to="/customers" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-user-shield me-2" /><span>Clientes</span></NavLink></li>
+                )}
+                {authService.hasAuthority("EMPLOYEE_READ") && (
+                  <li><NavLink to="/employees" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-user-group me-2" /><span>Funcionários</span></NavLink></li>
+                )}
+                {authService.hasAuthority("DEPARTMENT_READ") && (
+                  <li><NavLink to="/departments" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-building-user me-2" /><span>Departamentos</span></NavLink></li>
+                )}
+                {authService.hasAuthority("POSITION_READ") && (
+                  <li><NavLink to="/positions" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-id-badge me-2" /><span>Cargos</span></NavLink></li>
+                )}
+                {authService.hasAuthority("SUPPLIER_READ") && (
+                  <li><NavLink to="/suppliers" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-truck-field me-2" /><span>Fornecedores</span></NavLink></li>
+                )}
+              </ul>
+            </li>
+          )}
         </ul>
       </nav>
     </aside>

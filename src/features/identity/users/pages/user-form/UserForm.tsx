@@ -47,7 +47,7 @@ export function UserForm() {
       if (!userId) return;
       try {
         const data = await userService.findById(userId);
-        setUser(UserMapper.toDetailsModel(data));
+        setUser(UserMapper.toModel(data));
       } catch {
         // O interceptor HTTP já exibe a mensagem equivalente ao Angular.
       }

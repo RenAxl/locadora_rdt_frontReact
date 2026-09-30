@@ -1,0 +1,125 @@
+.employee-files-dialog .file-form-inputs .form-control {
+  height: 46px;
+}
+
+.employee-files-dialog .file-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.employee-files-dialog .file-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.employee-files-dialog .file-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.employee-files-dialog .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+.employee-files-dialog .upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.15s ease;
+}
+
+.employee-files-dialog .upload-btn:hover {
+  transform: translateY(-1px);
+}
+
+.employee-files-dialog .upload-btn:active {
+  transform: translateY(0px);
+}
+
+.employee-files-dialog .upload-btn-icon {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.employee-files-dialog .upload-input {
+  display: none;
+}
+
+.employee-files-dialog .file-chip {
+  max-width: 280px;
+  margin-left: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.employee-files-dialog .file-preview img {
+  max-width: 180px;
+  max-height: 120px;
+  margin-top: 12px;
+  border-radius: 8px;
+}
+
+.employee-files-dialog .file-photo {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.employee-files-dialog .actions-wrap {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.employee-files-dialog .file-view img {
+  display: block;
+  max-width: 100%;
+  max-height: 75vh;
+  margin: auto;
+  object-fit: contain;
+}
+
+.employee-files-dialog .file-view iframe {
+  width: 100%;
+  min-height: 75vh;
+  border: 0;
+}
+
+@media (max-width: 575.98px) {
+  .employee-files-dialog .file-chip {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 8px 0 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .employee-files-dialog .file-form-buttons {
+    justify-content: flex-end;
+  }
+}

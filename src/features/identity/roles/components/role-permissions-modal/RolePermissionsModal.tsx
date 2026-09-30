@@ -72,7 +72,7 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
           setFilteredPermissions(loadedPermissions);
         }
       } catch {
-        // O interceptor HTTP exibe a mensagem de erro.
+        
       } finally {
         setLoading(false);
       }
@@ -97,7 +97,7 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
       });
       setFilteredPermissions(filtered);
     } catch {
-      // O interceptor HTTP exibe a mensagem de erro.
+      
     } finally {
       setLoading(false);
     }
@@ -187,7 +187,7 @@ export function RolePermissionsModal(props: RolePermissionsModalProps) {
         detail: "Permissões atualizadas com sucesso!",
       });
     } catch {
-      // O interceptor HTTP exibe a mensagem de erro.
+      
     } finally {
       setSaving(false);
     }

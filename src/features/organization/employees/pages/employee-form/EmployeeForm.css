@@ -1,0 +1,169 @@
+.employee-form-screen .employee-form-container {
+  width: 100%;
+}
+
+.employee-form-screen .employee-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.employee-form-screen .employee-form-inputs .form-control {
+  height: 46px;
+}
+
+.employee-form-screen .employee-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.employee-form-screen .employee-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.employee-form-screen .employee-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.employee-form-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+.employee-form-screen .employee-photo-header {
+  margin-bottom: 18px;
+}
+
+.employee-form-screen .employee-photo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.employee-form-screen .employee-photo-frame {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+  flex: 0 0 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.employee-form-screen .employee-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.employee-form-screen .employee-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
+}
+
+.employee-form-screen .employee-photo-icon {
+  font-size: 34px;
+  opacity: 0.55;
+}
+
+.employee-form-screen .employee-photo-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.employee-form-screen .employee-photo-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.employee-form-screen .employee-photo-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+
+.employee-form-screen .employee-photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.employee-form-screen .upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.15s ease;
+}
+
+.employee-form-screen .upload-btn:hover {
+  transform: translateY(-1px);
+}
+
+.employee-form-screen .upload-btn:active {
+  transform: translateY(0px);
+}
+
+.employee-form-screen .upload-btn-icon {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.employee-form-screen .upload-input {
+  display: none;
+}
+
+.employee-form-screen .file-chip {
+  max-width: 280px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 992px) {
+  .employee-form-screen .employee-form-buttons {
+    justify-content: flex-end;
+  }
+}
+.employee-form-screen .salary-input-host {
+  display: flex;
+  width: 100%;
+}
+.employee-form-screen .salary-input-host .p-inputtext {
+  width: 100%;
+  height: 46px;
+  border-radius: 10px;
+}

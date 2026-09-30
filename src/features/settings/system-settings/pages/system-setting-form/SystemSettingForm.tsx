@@ -31,7 +31,6 @@ export function SystemSettingForm() {
           updateSetting(current);
         }
       } catch {
-        // O interceptor HTTP exibe o erro.
       } finally {
         if (active) setLoading(false);
       }

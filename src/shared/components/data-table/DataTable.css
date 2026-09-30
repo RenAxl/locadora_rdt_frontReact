@@ -36,6 +36,24 @@
   white-space: nowrap;
 }
 
+.global-table .profile-photo-placeholder {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.global-table .user-photo,
+.global-table .customer-photo,
+.global-table .employee-photo,
+.global-table .supplier-photo {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
 .global-table .row-inactive td {
   color: rgba(0, 0, 0, 0.55);
   background-color: rgba(0, 0, 0, 0.04);
@@ -125,5 +143,43 @@
 
   .global-table .p-datatable-tbody > tr {
     padding: 10px;
+  }
+}
+
+@media (max-width: 767px) {
+  .p-datatable.global-table .p-datatable-tbody > tr:not(.p-datatable-emptymessage) > td:not(.selection-column):not(.empty-message) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px 6px;
+    text-align: left;
+    line-height: 1.5;
+  }
+
+  .global-table .p-column-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #596579;
+    overflow-wrap: normal;
+  }
+
+  .global-table .p-datatable-tbody > tr > td > span:not(.p-column-title) {
+    max-width: 100%;
+    min-width: 0;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  .global-table .actions-cell .actions-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    max-width: 100%;
+    gap: 8px;
+  }
+
+  .p-datatable.global-table .p-datatable-wrapper .p-datatable-tbody > .p-datatable-emptymessage > td {
+    display: block;
+    text-align: center;
   }
 }

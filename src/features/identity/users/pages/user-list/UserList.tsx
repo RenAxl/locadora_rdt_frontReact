@@ -1,3 +1,4 @@
+import { authService } from "../../../../../core/auth/services/auth.service";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { confirmDialog } from "primereact/confirmdialog";
@@ -14,7 +15,6 @@ import { DataTableColumn } from "../../../../../shared/components/data-table/mod
 import { FieldCustomization } from "../../../../../shared/components/field-customization/FieldCustomization";
 import { NameFilter } from "../../../../../shared/components/name-filter/NameFilter";
 import { UserDetailsModal } from "../../components/user-details-modal/UserDetailsModal";
-import { UserDetailsDTO } from "../../dtos/user-details-dto";
 import { UserDTO } from "../../dtos/user-dto";
 import { UserMapper } from "../../mappers/user.mapper";
 import { User } from "../../models/User";
@@ -34,6 +34,10 @@ const availableFields: DataTableColumn[] = [
   { field: "address.state", label: "UF" },
   { field: "address.zipCode", label: "CEP" },
   { field: "photo", label: "Foto" },
+  { field: "createdBy", label: "Criado por" },
+  { field: "updatedBy", label: "Atualizado por" },
+  { field: "createdAt", label: "Data cadastro" },
+  { field: "updatedAt", label: "Data atualização" },
 ];
 
 export function UserList() {
@@ -146,8 +150,15 @@ export function UserList() {
     list(next);
   };
 
+  const canDeleteUsers = authService.hasAnyAuthority([
+    "ROLE_ADMINISTRADOR",
+    "USER_DELETE",
+  ]);
+  const canDelete = (user: User) =>
+    canDeleteUsers && !user.roles.includes("ROLE_ADMINISTRADOR");
+
   const deleteUser = (user: User) => {
-    if (!user.id) return;
+    if (!user.id || !canDelete(user)) return;
     confirmDialog({
       message: "Tem certeza que deseja excluir?",
       accept: async () => {
@@ -166,6 +177,7 @@ export function UserList() {
   };
 
   const onSelectionChange = (currentUsers: User[]) => {
+    currentUsers = currentUsers.filter(canDelete);
     setSelectedUsers(currentUsers);
     const idsOutsidePage = selectedUserIds.filter(
       (id) => !users.some((user) => user.id === id),
@@ -177,7 +189,7 @@ export function UserList() {
   };
 
   const deleteSelectedUsers = () => {
-    if (selectedUserIds.length === 0) return;
+    if (!canDeleteUsers || selectedUserIds.length === 0) return;
     const ids = [...selectedUserIds];
     confirmDialog({
       message: `Tem certeza que deseja excluir ${ids.length} usuário(s)?`,
@@ -203,8 +215,8 @@ export function UserList() {
     setDetailsVisible(true);
     setUserDetails(null);
     try {
-      const details: UserDetailsDTO = await userService.findById(user.id);
-      setUserDetails(UserMapper.toDetailsModel(details));
+      const details: UserDTO = await userService.findById(user.id);
+      setUserDetails(UserMapper.toModel(details));
     } catch {
       /* interceptor */
     }
@@ -250,6 +262,7 @@ export function UserList() {
         icon="pi pi-trash"
         tooltip="Excluir usuário"
         tooltipOptions={{ position: "top" }}
+        disabled={!canDelete(user)}
         onClick={() => deleteUser(user)}
       />
       <Button
@@ -288,7 +301,7 @@ export function UserList() {
               NOVO USUÁRIO
             </button>
           </Link>
-          {selectedUserIds.length > 0 && (
+          {canDeleteUsers && selectedUserIds.length > 0 && (
             <button
               className="btn btn-danger text-white btn-crud-action"
               type="button"
@@ -303,12 +316,16 @@ export function UserList() {
 
       <DataTable
         records={users}
+        showSelection={canDeleteUsers}
+        rowSelectable={canDelete}
         columns={visibleTableColumns}
         selectedRecords={selectedUsers}
         totalRecords={totalElements}
         rows={pagination.linesPerPage}
         loading={loading}
         columnTemplates={{
+          createdAt: (user) => user.createdAt ? new Intl.DateTimeFormat("pt-BR").format(user.createdAt) : "-",
+          updatedAt: (user) => user.updatedAt ? new Intl.DateTimeFormat("pt-BR").format(user.updatedAt) : "-",
           active: (user) => (user.active ? "Sim" : "Não"),
           photo: (user) =>
             photoMap[user.id!] ? (

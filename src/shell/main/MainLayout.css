@@ -11,6 +11,8 @@
 .main-area {
   flex: 1;
   margin-left: 220px;
+  min-width: 0;
+  transition: margin-left 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
 }
@@ -31,4 +33,11 @@
   .main-area {
     margin-left: 0;
   }
+}
+
+@media (min-width: 768px) {
+  .layout.sidebar-collapsed .main-area { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .main-area { transition: none; }
 }
