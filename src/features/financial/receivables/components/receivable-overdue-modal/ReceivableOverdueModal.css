@@ -1,0 +1,54 @@
+.receivable-overdue-dialog .overdue-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.receivable-overdue-dialog .overdue-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(35, 50, 71, 0.12);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.receivable-overdue-dialog .overdue-line.highlight {
+  border-color: rgba(220, 53, 69, 0.28);
+  background: #fff5f6;
+}
+
+.receivable-overdue-dialog .overdue-line span {
+  color: #6c757d;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.receivable-overdue-dialog .overdue-line strong {
+  color: #182536;
+  font-size: 15px;
+  text-align: right;
+}
+
+.receivable-overdue-dialog .overdue-line.highlight strong {
+  color: #dc3545;
+}
+
+.receivable-overdue-dialog .empty {
+  padding: 24px;
+  color: #6c757d;
+  text-align: center;
+}
+
+@media (max-width: 479px) {
+  .receivable-overdue-dialog .overdue-line {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .receivable-overdue-dialog .overdue-line strong {
+    text-align: left;
+  }
+}

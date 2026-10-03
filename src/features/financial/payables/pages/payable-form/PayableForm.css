@@ -1,0 +1,70 @@
+.payable-form-screen .payable-form-container {
+  width: 100%;
+}
+
+.payable-form-screen .payable-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.payable-form-screen .payable-form-inputs .form-control {
+  height: 46px;
+}
+
+.payable-form-screen .payable-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.payable-form-screen .payable-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.payable-form-screen .payable-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.payable-form-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+@media (min-width: 992px) {
+  .payable-form-screen .payable-form-buttons {
+    justify-content: flex-end;
+  }
+}
+
+.payable-form-screen .payable-amount-control,
+.payable-form-screen .payable-amount-input,
+.payable-form-screen .payable-amount-input .p-inputnumber-input {
+  display: block;
+  width: 100%;
+}
+
+.payable-form-screen .payable-amount-input .p-inputnumber-input {
+  height: 46px;
+}
+
+.payable-form-screen .payable-file-input {
+  padding: 0;
+  line-height: 44px;
+}
+
+.payable-form-screen .payable-file-input::file-selector-button {
+  height: 44px;
+  margin: 0 12px 0 0;
+  border: 0;
+  border-right: 1px solid #ced4da;
+}

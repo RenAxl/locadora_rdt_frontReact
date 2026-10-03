@@ -1,0 +1,10 @@
+.receivable-payment-choice-dialog .choice-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.receivable-payment-choice-dialog .choice-actions .btn {
+  min-height: 50px;
+  border-radius: 10px;
+  font-weight: bold;
+}

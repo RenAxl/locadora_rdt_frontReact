@@ -21,7 +21,8 @@ const users = [{ ...profile, createdAt: '2026-09-29T12:00:00Z', createdBy: 'admi
 const token = (authorities, exp = Math.floor(Date.now() / 1000) + 3600) =>
   `e30.${Buffer.from(JSON.stringify({ exp, user_name: 'teste@example.com', authorities })).toString('base64url')}.test`;
 const organizationAuthorities = ['DEPARTMENT', 'POSITION', 'EMPLOYEE', 'SUPPLIER'].flatMap((name) => ['READ', 'WRITE', 'DELETE'].map((action) => `${name}_${action}`));
-const adminToken = token([...organizationAuthorities, 'ROLE_ADMINISTRADOR', 'USER_READ', 'USER_WRITE', 'USER_PROFILE_READ', 'ROLE_READ', 'ROLE_WRITE', 'CUSTOMER_READ', 'CUSTOMER_WRITE', 'CUSTOMER_DELETE', 'SYSTEM_SETTING_READ', 'SYSTEM_SETTING_WRITE']);
+const financialAuthorities = ['PAYABLE', 'RECEIVABLE', 'METHODS', 'FREQUENCY'].flatMap((name) => ['READ', 'WRITE', 'DELETE'].map((action) => `${name}_${action}`));
+const adminToken = token([...organizationAuthorities, ...financialAuthorities, 'FINANCIAL_SETTINGS_READ', 'FINANCIAL_SETTINGS_WRITE', 'FINANCIAL_REPORTS_READ', 'ROLE_ADMINISTRADOR', 'USER_READ', 'USER_WRITE', 'USER_PROFILE_READ', 'ROLE_READ', 'ROLE_WRITE', 'CUSTOMER_READ', 'CUSTOMER_WRITE', 'CUSTOMER_DELETE', 'SYSTEM_SETTING_READ', 'SYSTEM_SETTING_WRITE']);
 
 const audit = { createdAt: '2026-09-29T12:00:00Z', updatedAt: '2026-09-29T13:00:00Z', createdBy: 'admin', updatedBy: 'gestor' };
 const organization = {
@@ -31,13 +32,47 @@ const organization = {
   suppliers: [{ id: 1, name: 'Andaimes Primavera', tradeName: 'Primavera', companyName: 'Primavera Ltda', cnpj: '98765004000165', phoneNumber: '11999900004', email: '[contato@example.com](mailto:contato@example.com)', address, ...audit }],
 };
 const organizationFiles = { employees: [], suppliers: [] };
+let financialSetting = { id: 1, defaultLateFeePercent: 2, defaultLateInterestPercent: 1, ...audit };
+const accountAudit = { createdAt: audit.createdAt, updatedAt: audit.updatedAt, createdByName: 'admin', updatedByName: 'gestor', paidByName: 'admin' };
+const accountFixtures = Array.from({ length: 12 }, (_, index) => ({
+  id: index + 1, description: `Conta Teste ${index + 1}`, amount: 100, originalAmount: 100,
+  dueDate: '2099-10-20', paymentDate: null, paid: false, canceled: false, residual: false,
+  remainingBalance: 100, currentAmountWithLateCharges: 102.5, subtotal: 0,
+  fee: 0, lateFee: 0, lateInterest: 0, discount: 0, overdueDays: 0,
+  calculatedLateFee: 0, calculatedLateInterest: 0,
+  paymentMethodId: 1, paymentMethodName: 'Cartão', paymentFrequencyId: 1, paymentFrequency: 'Mensal',
+  customerId: 1, customerName: 'Cliente financeiro', supplierId: 1, supplierName: 'Fornecedor financeiro', employeeId: 1, employeeName: 'Funcionário financeiro', ...accountAudit,
+}));
+Object.assign(accountFixtures[1], { amount: 200, originalAmount: 200, remainingBalance: 200, dueDate: '2020-01-01', currentAmountWithLateCharges: 215, calculatedLateFee: 10, calculatedLateInterest: 5, overdueDays: 10 });
+Object.assign(accountFixtures[2], { paymentDate: '2026-10-01', subtotal: 30, remainingBalance: 70, currentAmountWithLateCharges: 71.75 });
+Object.assign(accountFixtures[3], { paid: true, paymentDate: '2026-10-01', subtotal: 100, remainingBalance: 0, currentAmountWithLateCharges: 107.5, fee: 2.5, lateFee: 5 });
+Object.assign(accountFixtures[4], { canceled: true });
+Object.assign(accountFixtures[5], { amount: 50, originalAmount: 100, remainingBalance: 50, residual: true, parentPayableId: 3, parentReceivableId: 3 });
+const financial = {
+  'payment-methods': [
+    { id: 1, name: 'Cartão', fee: 2.5, ...audit },
+    { id: 2, name: 'PIX', fee: 0, ...audit },
+    { id: 3, name: 'Boleto', fee: 1, ...audit },
+    ...Array.from({ length: 3 }, (_, index) => ({ id: index + 4, name: `Método ${index + 4}`, fee: null, ...audit })),
+  ],
+  'payment-frequencies': Array.from({ length: 6 }, (_, index) => ({ id: index + 1, frequency: index === 0 ? 'Mensal' : `Frequência ${index + 1}`, days: 30 + index, ...audit })),
+  payables: accountFixtures.map((record) => ({ ...record })),
+  receivables: accountFixtures.map((record) => ({ ...record })),
+};
+const financialFiles = { payables: [], receivables: [] };
+
 
 const server = await createServer({
   server: { host: '127.0.0.1', port, strictPort: true },
   plugins: [{ name: 'sync-test-api', configureServer(vite) {
     vite.middlewares.use('/mock-api', async (req, res) => {
       let body = '';
-      for await (const chunk of req) body += chunk;
+      try {
+        for await (const chunk of req) body += chunk;
+      } catch {
+        // A navegação pode cancelar uma requisição pendente da API simulada.
+        return;
+      }
       const url = new URL(req.url, origin);
       requests.push({ method: req.method, path: url.pathname, search: url.search, body, headers: req.headers });
       res.setHeader('Content-Type', 'application/json');
@@ -49,6 +84,61 @@ const server = await createServer({
       let data = {};
       const parts = url.pathname.split('/');
       const resource = parts[1];
+      if (url.pathname === '/financial-settings') {
+        if (req.method === 'PUT') financialSetting = { ...financialSetting, ...JSON.parse(body) };
+        res.end(JSON.stringify(financialSetting)); return;
+      }
+      if (url.pathname.startsWith('/reports/financial-reports/')) {
+        if (parts[3] === 'comparison') {
+          data = { year: Number(url.searchParams.get('year') || 2026), receivableTotal: 250, payableTotal: 100, balance: 150, receivableCount: 3, payableCount: 2,
+            months: Array.from({ length: 12 }, (_, index) => ({ month: index + 1, label: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][index], receivableTotal: index === 0 ? 250 : 0, payableTotal: index === 0 ? 100 : 0 })) };
+          res.end(JSON.stringify(data)); return;
+        }
+        res.setHeader('Content-Type', parts[4] === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.end(parts[4] === 'pdf' ? '%PDF-1.4 test' : 'mock excel'); return;
+      }
+      if (Object.hasOwn(financial, resource)) {
+        const id = Number(parts[2]);
+        if (parts[3] === 'receipt' || parts[3] === 'fiscal-coupon') {
+          res.setHeader('Content-Type', 'application/pdf'); res.end('%PDF-1.4 test'); return;
+        }
+        if (parts[3] === 'files') {
+          if (parts[5] === 'view' || parts[5] === 'download') {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', "attachment; filename*=UTF-8''comprovante%20assinado.pdf");
+            res.end('%PDF-1.4 test'); return;
+          }
+          if (req.method === 'POST') {
+            data = { id: financialFiles[resource].length + 1, name: 'Comprovante', originalFileName: 'conta.pdf', contentType: 'application/pdf', size: 100, [resource === 'payables' ? 'payableId' : 'receivableId']: id, ...audit };
+            financialFiles[resource].push(data);
+          } else if (req.method === 'DELETE') financialFiles[resource] = financialFiles[resource].filter((file) => file.id !== Number(parts[4]));
+          else data = financialFiles[resource].filter((file) => file[resource === 'payables' ? 'payableId' : 'receivableId'] === id);
+        } else if (parts[2] === 'report') {
+          data = { totalItems: 12, totalAmount: 1200, paidAmount: 100, openAmount: 1100 };
+        } else if (parts[3] === 'payments') {
+          const payment = JSON.parse(body);
+          const account = financial[resource].find((record) => record.id === id);
+          const total = account.remainingBalance + payment.fee + payment.lateFee + payment.lateInterest;
+          data = { ...account, paymentDate: payment.paymentDate, paymentMethodId: payment.paymentMethodId, paid: payment.paymentAmount >= total, remainingBalance: Math.max(0, account.remainingBalance - payment.paymentAmount), subtotal: payment.paymentAmount, currentAmountWithLateCharges: total, fee: payment.fee, lateFee: payment.lateFee, lateInterest: payment.lateInterest };
+          financial[resource] = financial[resource].map((record) => record.id === id ? data : record);
+        } else if (req.method === 'DELETE') {
+          const ids = parts[2] === 'all' ? JSON.parse(body) : [id];
+          financial[resource] = financial[resource].filter((record) => !ids.includes(record.id));
+        } else if (req.method === 'POST' || req.method === 'PUT') {
+          data = { ...JSON.parse(body), id: req.method === 'POST' ? 20 : id, ...audit, ...accountAudit };
+          if (req.method === 'POST') financial[resource].push(data);
+          else financial[resource] = financial[resource].map((record) => record.id === id ? { ...record, ...data } : record);
+        } else if (parts[2]) data = financial[resource].find((record) => record.id === id);
+        else {
+          const field = resource === 'payment-frequencies' ? 'frequency' : resource.includes('payment-') ? 'name' : 'description';
+          const filter = url.searchParams.get(resource.includes('payment-') ? field : 'search') || '';
+          const filtered = financial[resource].filter((record) => record[field].includes(filter));
+          const size = Number(url.searchParams.get('linesPerPage') || 5);
+          const start = Number(url.searchParams.get('page') || 0) * size;
+          data = { content: filtered.slice(start, start + size), totalElements: filtered.length };
+        }
+        res.end(JSON.stringify(data)); return;
+      }
       if (Object.hasOwn(organization, resource)) {
         const id = Number(parts[2]);
         if (parts[3] === 'photo' || parts[3] === 'image') {
@@ -220,6 +310,14 @@ async function fill(selector, value) {
 async function click(selector) {
   await waitFor(`!!document.querySelector(${JSON.stringify(selector)})`);
   await evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);
+}
+async function select(selector, value) {
+  await evaluate(`(() => { const input = document.querySelector(${JSON.stringify(selector)}); input.value = ${JSON.stringify(String(value))}; input.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+}
+async function number(selector, value) {
+  await evaluate(`document.querySelector(${JSON.stringify(selector)}).focus()`);
+  await fill(selector, value);
+  await evaluate(`document.querySelector(${JSON.stringify(selector)}).blur()`);
 }
 async function authenticate(value) { await evaluate(`localStorage.setItem('token', ${JSON.stringify(value)})`); }
 async function screenshot(name) {
@@ -725,6 +823,420 @@ try {
   await cdp('Emulation.clearDeviceMetricsOverride');
   console.log('OK tabelas e formulários nos breakpoints 390/767/768/1024, sidebar desktop/mobile e transições');
 
+  await authenticate(token([]));
+  const financialRoutes = ['/financial-settings', '/reports/financial-reports', '/reports', ...['payables', 'receivables', 'payment-methods', 'payment-frequencies'].flatMap((resource) => [`/${resource}`, `/${resource}/create`, `/${resource}/1/edit`])];
+  for (const path of financialRoutes) {
+    await cdp('Page.navigate', { url: origin + path });
+    await waitFor("location.pathname === '/not-authorized'");
+  }
+  await authenticate(token(['POSITION_READ']));
+  await visit('/positions', '.position-list-screen');
+  assert.equal(await evaluate("document.querySelector('.sidebar').textContent.includes('Organização')"), true);
+  await authenticate(token(['FINANCIAL_REPORTS_READ']));
+  await cdp('Page.navigate', { url: origin + '/reports' });
+  await waitFor("location.pathname === '/reports/financial-reports' && !!document.querySelector('.financial-report-list-screen')");
+  await authenticate(adminToken);
+  await visit('/home', '#submenuFinancialDesktop');
+  assert.equal(await evaluate("document.querySelectorAll('#submenuAdministracaoDesktop').length"), 1);
+  assert.equal(await evaluate("document.querySelectorAll('#submenuReportsDesktop').length"), 1);
+  await click('[data-bs-target="#submenuReportsDesktop"]');
+  await waitFor("document.querySelector('#submenuReportsDesktop').classList.contains('show')");
+  assert.equal(await evaluate("document.querySelector('#submenuAdministracaoDesktop').classList.contains('show')"), false);
+  console.log('OK novas rotas financeiras, permissões, redirecionamento e menus independentes');
+
+  for (const [resource, single, authority] of [['payment-methods', 'payment-method', 'METHODS'], ['payment-frequencies', 'payment-frequency', 'FREQUENCY'], ['payables', 'payable', 'PAYABLE'], ['receivables', 'receivable', 'RECEIVABLE']]) {
+    await authenticate(token([`${authority}_READ`]));
+    await visit(`/${resource}`, `.${single}-list-screen`);
+    await waitFor(`!document.querySelector('.${single}-list-screen [aria-busy=true]')`);
+    assert.equal(await evaluate(`document.querySelectorAll('.${single}-list-screen .pi-pencil, .${single}-list-screen .pi-trash, .${single}-list-screen .pi-check-circle, a[href="/${resource}/create"]').length`), 0);
+    if (resource === 'payables' || resource === 'receivables') {
+      await click(`.${single}-list-screen .pi-folder-open`);
+      await waitFor(`!!document.querySelector('.${single}-files-dialog')`);
+      assert.equal(await evaluate(`!!document.querySelector('.${single}-files-dialog form')`), false);
+      assert.equal(await evaluate(`!!document.querySelector('.${single}-files-dialog .pi-trash')`), false);
+    }
+  }
+  await authenticate(token(['FINANCIAL_SETTINGS_READ']));
+  await visit('/financial-settings', '#defaultLateFeePercent');
+  assert.equal(await evaluate("document.querySelectorAll('button[type=submit]').length"), 0);
+  await authenticate(adminToken);
+  console.log('OK ações financeiras e anexos respeitam READ/WRITE/DELETE');
+
+  for (const [resource, single, field, modelName] of [['payment-methods', 'payment-method', 'name', 'Forma nova'], ['payment-frequencies', 'payment-frequency', 'frequency', 'Frequência nova']]) {
+    await visit(`/${resource}/create`, `#${field}`);
+    assert.equal(await evaluate("document.querySelector('button[type=submit]').disabled"), true);
+    await fill(`#${field}`, 'ab');
+    assert.equal(await evaluate("document.querySelector('button[type=submit]').disabled"), true);
+    await fill(`#${field}`, modelName);
+    if (resource === 'payment-methods') await number('#fee', '3,50');
+    else {
+      assert.equal(await evaluate("document.querySelector('button[type=submit]').disabled"), true);
+      await number('#days', '0');
+    }
+    await click('button[type=submit]');
+    await waitFor(`location.pathname.split('/').filter(Boolean).join('/') === '${resource}'`);
+    const insertedCatalog = JSON.parse(latest(`/${resource}`, 'POST').body);
+    assert.deepEqual(insertedCatalog, resource === 'payment-methods' ? { name: modelName, fee: 3.5 } : { frequency: modelName, days: 0 });
+    await visit(`/${resource}/20/edit`, `#${field}`);
+    await waitFor(`document.querySelector('#${field}').value === '${modelName}'`);
+    await fill(`#${field}`, `${modelName} editada`);
+    await click('button[type=submit]');
+    await waitFor(`location.pathname.split('/').filter(Boolean).join('/') === '${resource}'`);
+    assert.equal(JSON.parse(latest(`/${resource}/20`, 'PUT').body).id, 20);
+    await fill(`.${single}-list-screen .filter-name-container input`, 'editada');
+    await click(`.${single}-list-screen .filter-search-icon`);
+    await waitFor(`document.querySelector('.${single}-list-screen .p-datatable-tbody').textContent.includes('editada')`);
+    await click(`.${single}-list-screen .pi-eye`);
+    await waitFor(`document.querySelector('.${single}-details-dialog')?.textContent.includes('editada')`);
+    await click(`.${single}-details-dialog .p-dialog-header-close`);
+    await click(`.${single}-list-screen .pi-file-excel`);
+    await click('.p-confirm-dialog-accept');
+    await waitFor("!document.querySelector('.p-confirm-dialog')");
+    assert.equal(JSON.parse(latest('/listing-exports/excel', 'POST').body).rows.length, 1);
+    await click(`.${single}-list-screen .pi-trash`);
+    await click('.p-confirm-dialog-accept');
+    await waitFor(`document.querySelector('.${single}-list-screen .p-datatable-emptymessage') != null`);
+    assert.ok(latest(`/${resource}/20`, 'DELETE'));
+  }
+  console.log('OK formas/frequências: validações, criação, edição, filtro, detalhes, Excel e exclusão');
+
+  await visit('/financial-settings', '#defaultLateFeePercent');
+  await waitFor("document.querySelector('#defaultLateFeePercent').value.includes('2,00')");
+  await number('#defaultLateFeePercent', '4,50');
+  await number('#defaultLateInterestPercent', '1,25');
+  await click('button[type=submit]');
+  await waitFor("document.body.textContent.includes('Configurações financeiras atualizadas com sucesso!')");
+  assert.deepEqual(JSON.parse(latest('/financial-settings', 'PUT').body), { defaultLateFeePercent: 4.5, defaultLateInterestPercent: 1.25 });
+  assert.equal(await evaluate('location.pathname'), '/financial-settings');
+  console.log('OK configurações de multa e juros sem descontos antigos');
+
+  for (const [resource, single] of [['payables', 'payable'], ['receivables', 'receivable']]) {
+    await visit(`/${resource}/create`, '#description');
+    assert.equal(await evaluate("document.querySelector('button[type=submit]').disabled"), true);
+    await fill('#description', 'Conta criada');
+    await number('#amount', '123,45');
+    await fill('#dueDate', '2099-10-20');
+    let customerId = null;
+    if (resource === 'receivables') {
+      assert.equal(await evaluate("document.querySelector('button[type=submit]').disabled"), true);
+      await waitFor("document.querySelectorAll('#customerId option').length > 1");
+      customerId = Number(await evaluate("document.querySelectorAll('#customerId option')[1].value"));
+      await select('#customerId', customerId);
+    }
+    await waitFor("document.querySelectorAll('#paymentMethodId option').length > 1 && document.querySelectorAll('#paymentFrequencyId option').length > 1");
+    await select('#paymentMethodId', 1);
+    await select('#paymentFrequencyId', 1);
+    await evaluate("(() => { const data = new DataTransfer(); data.items.add(new File(['pdf'], 'conta.pdf', { type: 'application/pdf' })); const input = document.querySelector('#file'); input.files = data.files; input.dispatchEvent(new Event('change', { bubbles: true })); })()");
+    await click('button[type=submit]');
+    await waitFor(`location.pathname.split('/').filter(Boolean).join('/') === '${resource}'`);
+    const accountBody = JSON.parse(latest(`/${resource}`, 'POST').body);
+    assert.equal(accountBody.amount, 123.45);
+    assert.equal(accountBody.paymentMethodId, 1);
+    assert.equal(accountBody.paymentFrequencyId, 1);
+    assert.equal(accountBody.fileName, 'conta.pdf');
+    assert.equal(accountBody.customerId ?? null, customerId);
+    assert.equal('installments' in accountBody, false);
+    assert.equal('discount' in accountBody, false);
+    assert.match(latest(`/${resource}/20/files`, 'POST').headers['content-type'], /multipart\/form-data; boundary=/);
+    await visit(`/${resource}/20/edit`, '#description');
+    await waitFor("document.querySelector('#description').value === 'Conta criada'");
+    await fill('#description', 'Conta editada');
+    await click('button[type=submit]');
+    await waitFor(`location.pathname.split('/').filter(Boolean).join('/') === '${resource}'`);
+    assert.equal(JSON.parse(latest(`/${resource}/20`, 'PUT').body).id, 20);
+    await visit(`/${resource}`, `.${single}-card`);
+    await waitFor(`document.querySelectorAll('.${single}-card').length === 10`);
+    assert.equal(new URLSearchParams(latest(`/${resource}`, 'GET').search).get('orderBy'), 'dueDate');
+    await click(`.${single}-list-screen .p-paginator-next`);
+    await waitFor(`document.querySelector('.${single}-id')?.textContent === '#11'`);
+    assert.equal(new URLSearchParams(latest(`/${resource}`, 'GET').search).get('page'), '1');
+    await click(`.${single}-list-screen .p-paginator-prev`);
+    await waitFor(`document.querySelector('.${single}-id')?.textContent === '#1'`);
+    await fill(`#${single}-search`, '  Conta Teste 1  ');
+    await click(`.${single}-filters button[type=submit]`);
+    await waitFor(`document.querySelectorAll('.${single}-card').length === 4`);
+    assert.equal(new URLSearchParams(latest(`/${resource}`, 'GET').search).get('search'), 'Conta Teste 1');
+    await click(`.${single}-filters .btn-outline-danger`);
+    await waitFor(`document.querySelectorAll('.${single}-card').length === 10`);
+    await evaluate(`document.querySelector('.${single}-quick-period-screen .quick-period-chip').click()`);
+    await waitFor(`document.querySelector('.${single}-quick-period-screen .quick-period-chip').classList.contains('selected')`);
+    const today = await evaluate("(() => { const date = new Date(); return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0'); })()");
+    await waitFor(`document.querySelector('#${single}-start-date').value === '${today}'`);
+    assert.equal(new URLSearchParams(latest(`/${resource}`, 'GET').search).get('startDate'), today);
+    await fill(`#${single}-start-date`, '2020-01-01');
+    await waitFor(`!document.querySelector('.${single}-quick-period-screen .quick-period-chip.selected')`);
+    await click(`.${single}-filters .btn-outline-danger`);
+    await waitFor(`document.querySelector('.${single}-id')?.textContent === '#1'`);
+    assert.equal(await evaluate(`document.querySelectorAll('.${single}-card-canceled button[aria-label="Baixar conta total ou parcial"]').length`), 0);
+    await click(`.${single}-list-screen button[aria-label="Detalhamento da conta"]`);
+    await waitFor(`document.querySelector('.${single}-details-dialog')?.textContent.includes('Conta Teste 1')`);
+    await click(`.${single}-details-dialog .p-dialog-header-close`);
+
+    await click(`.${single}-card button[aria-label="Baixar conta total ou parcial"]`);
+    await waitFor(`document.querySelector('.${single}-payment-dialog #payment-amount')?.value.includes('102,50')`);
+    await number('#payment-amount', '200,00');
+    assert.equal(await evaluate(`document.querySelector('.${single}-payment-dialog button[type=submit]').disabled`), true);
+    await select('#payment-method', 2);
+    await waitFor("document.querySelector('#payment-amount').value.includes('100,00')");
+    await select('#payment-method', 3);
+    await waitFor("document.querySelector('#payment-amount').value.includes('101,00')");
+    await select('#payment-method', 1);
+    await waitFor("document.querySelector('#payment-amount').value.includes('102,50')");
+    await click(`.${single}-payment-dialog button[type=submit]`);
+    await waitFor(`!document.querySelector('.${single}-payment-dialog') && !!document.querySelector('.${single}-card-paid')`);
+    const fullPayment = JSON.parse(latest(`/${resource}/1/payments`, 'POST').body);
+    assert.equal(fullPayment.paymentAmount, 102.5);
+    assert.equal(fullPayment.fee, 2.5);
+    assert.equal(fullPayment.subtotal, 100);
+    assert.equal(fullPayment.lateFee, 0);
+    assert.equal(fullPayment.lateInterest, 0);
+    assert.equal('discount' in fullPayment, false);
+    assert.equal('installments' in fullPayment, false);
+
+    await evaluate(`document.querySelectorAll('.${single}-card')[2].querySelector('[aria-label="Baixar conta total ou parcial"]').click()`);
+    await waitFor("document.querySelector('#payment-amount')?.value.includes('71,75')");
+    await number('#payment-amount', '50,00');
+    await click(`.${single}-payment-dialog button[type=submit]`);
+    await waitFor(`!document.querySelector('.${single}-payment-dialog')`);
+    const partialPayment = JSON.parse(latest(`/${resource}/3/payments`, 'POST').body);
+    assert.equal(partialPayment.paymentAmount, 50);
+    assert.equal(partialPayment.fee, 1.75);
+    assert.equal(partialPayment.subtotal, 100);
+
+    await evaluate(`document.querySelectorAll('.${single}-card')[1].querySelector('.due-date-button').click()`);
+    await waitFor(`document.querySelector('.${single}-overdue-dialog')?.textContent.includes('Dias em atraso')`);
+    await click(`.${single}-overdue-dialog .p-dialog-header-close`);
+    await evaluate(`document.querySelectorAll('.${single}-card')[1].querySelector('[aria-label="Baixar conta total ou parcial"]').click()`);
+    await waitFor(`!!document.querySelector('.${single}-payment-choice-dialog')`);
+    await click(`.${single}-payment-choice-dialog .btn-primary`);
+    await waitFor("document.querySelector('#payment-amount')?.value.includes('220,00')");
+    await click(`.${single}-payment-dialog .p-dialog-header-close`);
+    await evaluate(`document.querySelectorAll('.${single}-card')[1].querySelector('[aria-label="Baixar conta total ou parcial"]').click()`);
+    await click(`.${single}-payment-choice-dialog .btn-outline-primary`);
+    await waitFor("!!document.querySelector('#editedLateFee')");
+    await number('#editedLateFee', '4,00');
+    await number('#editedLateInterest', '6,00');
+    await click(`.${single}-payment-charges-dialog button[type=submit]`);
+    await waitFor("document.querySelector('#payment-amount')?.value.includes('215,00')");
+    await click(`.${single}-payment-dialog button[type=submit]`);
+    await waitFor(`!document.querySelector('.${single}-payment-dialog')`);
+    const overduePayment = JSON.parse(latest(`/${resource}/2/payments`, 'POST').body);
+    assert.equal(overduePayment.paymentAmount, 215);
+    assert.equal(overduePayment.fee, 5);
+    assert.equal(overduePayment.lateFee, 4);
+    assert.equal(overduePayment.lateInterest, 6);
+    console.log(`OK ${resource}: formulário, anexo, edição, paginação, filtros, baixa total/parcial, taxa e encargos`);
+  }
+
+
+  for (const [resource, single] of [['payables', 'payable'], ['receivables', 'receivable']]) {
+    await visit(`/${resource}`, `.${single}-card`);
+    await click(`.${single}-list-screen .pi-cog`);
+    await waitFor("!!document.querySelector('.fields-list')");
+    for (const label of ['Valor atual', resource === 'payables' ? 'Valor pago' : 'Valor recebido', 'Taxa']) {
+      await evaluate(`(() => { const field = [...document.querySelectorAll('.field-option')].find((option) => option.textContent === ${JSON.stringify(label)}); if (!field.querySelector('input').checked) field.querySelector('input').click(); })()`);
+    }
+    await evaluate("[...document.querySelectorAll('.field-option')].find((field) => field.textContent === 'Taxa').querySelector('input').click()");
+    await evaluate("[...document.querySelectorAll('.field-option')].find((field) => field.textContent === 'Taxa').querySelector('input').click()");
+    await click('.modal-actions button');
+    await waitFor("!document.querySelector('.fields-list')");
+    assert.ok(JSON.parse(await evaluate(`localStorage.getItem('${single}-visible-fields')`)).includes('currentAmountWithLateCharges'));
+    const paidValues = await evaluate(`(() => { const record = document.querySelectorAll('.${single}-card')[3]; return [record.querySelector('.current-amount dd').textContent, record.querySelector('.paid-amount dd').textContent]; })()`);
+    assert.equal(paidValues[0], paidValues[1]);
+    await click(`.${single}-list-tools .pi-file-excel`);
+    await click('.p-confirm-dialog-accept');
+    await waitFor("!document.querySelector('.p-confirm-dialog')");
+    const exported = JSON.parse(latest('/listing-exports/excel', 'POST').body);
+    assert.equal(exported.rows.length, 13);
+    assert.ok(exported.columns.includes('Valor atual'));
+    assert.equal(exported.rows[3][exported.columns.indexOf('Valor atual')], exported.rows[3][exported.columns.indexOf(resource === 'payables' ? 'Valor pago' : 'Valor recebido')]);
+
+    const party = resource === 'payables' ? 'supplier' : 'customer';
+    await waitFor(`document.querySelectorAll('#${single}-${party}s option').length > 0`);
+    const partyName = await evaluate(`document.querySelector('#${single}-${party}s option').value`);
+    await fill(`#${single}-${party}`, ` ${partyName.toUpperCase()} `);
+    await select(`#${single}-period-type`, 'PAYMENT_DATE');
+    await select(`#${single}-status`, 'PARTIALLY_PAID');
+    await select(`#${single}-payment-method`, 2);
+    await select(`#${single}-payment-frequency`, 1);
+    await fill(`#${single}-minimum-amount`, '0');
+    await fill(`#${single}-maximum-amount`, '500');
+    await select(`#${single}-sort`, 2);
+    await click(`.${single}-filters button[type=submit]`);
+    await waitFor(`document.querySelector('.${single}-list').getAttribute('aria-busy') === 'false'`);
+    const query = new URLSearchParams(latest(`/${resource}`, 'GET').search);
+    assert.equal(query.get('minimumAmount'), '0');
+    assert.equal(query.get('maximumAmount'), '500');
+    assert.equal(query.get('periodType'), 'PAYMENT_DATE');
+    assert.equal(query.get('status'), 'PARTIALLY_PAID');
+    assert.equal(query.get('paymentMethodId'), '2');
+    assert.equal(query.get('paymentFrequencyId'), '1');
+    assert.equal(query.get('orderBy'), 'amount');
+    assert.equal(query.get('direction'), 'DESC');
+    assert.ok(Number(query.get(`${party}Id`)) > 0);
+    await click(`.${single}-filters .btn-outline-danger`);
+    await waitFor(`document.querySelector('.${single}-list').getAttribute('aria-busy') === 'false'`);
+
+    await click(`.${single}-card button[aria-label="Arquivos da conta"]`);
+    await waitFor(`!!document.querySelector('.${single}-files-dialog #fileName')`);
+    await fill('#fileName', 'Comprovante assinado');
+    await evaluate("(() => { const data = new DataTransfer(); data.items.add(new File(['pdf'], 'documento.pdf', { type: 'application/pdf' })); const input = document.querySelector('#fileInput'); input.files = data.files; input.dispatchEvent(new Event('change', { bubbles: true })); })()");
+    await click(`.${single}-files-dialog button[type=submit]`);
+    await waitFor(`!!document.querySelector('.${single}-files-dialog .pi-download')`);
+    const upload = latest(`/${resource}/1/files`, 'POST');
+    assert.match(upload.headers['content-type'], /multipart\/form-data; boundary=/);
+    assert.match(upload.body, /Comprovante assinado/);
+    assert.match(upload.body, /filename="documento.pdf"/);
+    await click(`.${single}-files-dialog .pi-file-pdf`);
+    await waitFor(`!!document.querySelector('.${single}-files-dialog .file-view iframe')`);
+    await click(`.${single}-files-dialog:has(iframe) .p-dialog-header-close`);
+    await evaluate("window.lastDownload = ''; HTMLAnchorElement.prototype.click = function() { window.lastDownload = this.download; }");
+    await click(`.${single}-files-dialog .pi-download`);
+    await waitFor("window.lastDownload === 'comprovante assinado.pdf'");
+    assert.ok(latest(`/${resource}/1/files/2/download`, 'GET'));
+    await click(`.${single}-files-dialog .pi-trash`);
+    await click('.p-confirm-dialog-accept');
+    await waitFor(`!document.querySelector('.${single}-files-dialog .pi-trash')`);
+    assert.ok(latest(`/${resource}/1/files/2`, 'DELETE'));
+    await click(`.${single}-files-dialog .p-dialog-header-close`);
+  }
+  console.log('OK valores pagos equivalentes ao total, personalização, Excel, filtros completos e anexos financeiros');
+
+  await visit('/receivables', '.receivable-card');
+  await evaluate("window.lastOpened = ''; window.open = (url) => { window.lastOpened = url; return null; }");
+  await click('.receivable-card button[aria-label="Recibo"]');
+  await waitFor("window.lastOpened.startsWith('blob:')");
+  assert.ok(latest('/receivables/1/receipt', 'GET'));
+  assert.equal(await evaluate("(async () => (await fetch(window.lastOpened)).headers.get('Content-Type'))()"), 'application/pdf');
+  await evaluate("window.lastOpened = ''");
+  await click('.receivable-card button[aria-label="Cupom fiscal"]');
+  await waitFor("window.lastOpened.startsWith('blob:')");
+  assert.ok(latest('/receivables/1/fiscal-coupon', 'GET'));
+  console.log('OK recibo e cupom fiscal de contas recebidas');
+
+  await visit('/reports/financial-reports', '.financial-report-list-screen');
+  await waitFor("document.querySelectorAll('.month-group').length === 12 && document.querySelector('.comparison-summary').textContent.includes('250,00')");
+  await select('#report-type', 'financial');
+  assert.equal(await evaluate("!!document.querySelector('#report-customer') && !!document.querySelector('#report-supplier') && !!document.querySelector('#report-employee')"), true);
+  await fill('#report-search', '  aluguel  ');
+  await fill('#report-start-date', '2026-01-01');
+  await fill('#report-end-date', '2026-12-31');
+  await select('#report-period-type', 'PAYMENT_DATE');
+  await select('#report-status', 'PENDING');
+  await select('#report-payment-method', 1);
+  await fill('#report-minimum-amount', '0');
+  await fill('#report-maximum-amount', '500');
+  await evaluate("window.lastDownload = ''; HTMLAnchorElement.prototype.click = function() { window.lastDownload = this.download; }; window.lastOpened = ''; window.open = (url) => { window.lastOpened = url; return null; }");
+  await click('.financial-report-form-buttons .btn-success');
+  await waitFor("window.lastDownload === 'financeiro.xlsx'");
+  const reportQuery = new URLSearchParams(latest('/reports/financial-reports/financial/xlsx', 'GET').search);
+  assert.equal(reportQuery.get('search'), 'aluguel');
+  assert.equal(reportQuery.get('minimumAmount'), '0');
+  assert.equal(reportQuery.get('maximumAmount'), '500');
+  assert.equal(reportQuery.get('periodType'), 'PAYMENT_DATE');
+  assert.equal(reportQuery.get('status'), 'PENDING');
+  assert.equal(reportQuery.get('paymentMethodId'), '1');
+  assert.equal(reportQuery.get('startDate'), '2026-01-01');
+  assert.equal(reportQuery.get('endDate'), '2026-12-31');
+  await click('.financial-report-form-buttons .btn-primary');
+  await waitFor("window.lastOpened.startsWith('blob:')");
+  assert.ok(latest('/reports/financial-reports/financial/pdf', 'GET'));
+  assert.equal(await evaluate("(async () => (await fetch(window.lastOpened)).headers.get('Content-Type'))()"), 'application/pdf');
+  for (const [type, visible, hidden] of [['summary-customer', '#report-customer', '#report-supplier'], ['summary-supplier', '#report-supplier', '#report-employee'], ['summary-employee', '#report-employee', '#report-customer']]) {
+    await select('#report-type', type);
+    assert.equal(await evaluate(`!!document.querySelector('${visible}')`), true);
+    assert.equal(await evaluate(`!!document.querySelector('${hidden}')`), false);
+    assert.equal(await evaluate("!!document.querySelector('#report-status')"), false);
+  }
+  await select('#report-type', 'annual-balance');
+  assert.equal(await evaluate("!!document.querySelector('#report-year') && !document.querySelector('#report-start-date') && !document.querySelector('#report-search')"), true);
+  await fill('#report-year', '1800');
+  await click('.financial-report-form-buttons .btn-success');
+  await waitFor("document.body.textContent.includes('Informe um ano válido.')");
+  assert.equal(latest('/reports/financial-reports/annual-balance/xlsx', 'GET'), undefined);
+  await fill('#report-year', '2027');
+  await evaluate("window.lastDownload = ''");
+  await click('.financial-report-form-buttons .btn-success');
+  await waitFor("window.lastDownload === 'balanco-anual.xlsx'");
+  assert.equal(new URLSearchParams(latest('/reports/financial-reports/annual-balance/xlsx', 'GET').search).get('year'), '2027');
+  await click('.financial-report-form-buttons .btn-outline-primary');
+  await waitFor("document.querySelector('.comparison-header').textContent.includes('2027') && !document.querySelector('.loading-label')");
+  await click('.financial-report-form-buttons .btn-outline-danger');
+  await waitFor("document.querySelector('#report-type').value === 'receivables' && !document.querySelector('.loading-label')");
+  await fill('#report-start-date', '2026-12-31');
+  await fill('#report-end-date', '2026-01-01');
+  const beforeInvalidReport = requests.filter((request) => request.path === '/reports/financial-reports/receivables/pdf').length;
+  await click('.financial-report-form-buttons .btn-primary');
+  await waitFor("document.body.textContent.includes('Data inicial não pode ser maior')");
+  assert.equal(requests.filter((request) => request.path === '/reports/financial-reports/receivables/pdf').length, beforeInvalidReport);
+  await fill('#report-start-date', '');
+  await fill('#report-end-date', '');
+  await fill('#report-minimum-amount', '500');
+  await fill('#report-maximum-amount', '100');
+  await click('.financial-report-form-buttons .btn-primary');
+  await waitFor("document.body.textContent.includes('Valor inicial não pode ser maior')");
+  await click('.financial-report-form-buttons .btn-outline-danger');
+  await waitFor("!document.querySelector('.loading-label')");
+  failPath = '/reports/financial-reports/comparison';
+  await click('.financial-report-form-buttons .btn-outline-primary');
+  await waitFor("document.body.textContent.includes('Falha simulada') && !document.querySelector('.loading-label')");
+  failPath = '';
+  await screenshot('financial-reports-desktop');
+  console.log('OK relatórios: gráfico, filtros, validações, PDF, Excel, sintéticos, balanço anual e erro HTTP');
+
+  for (const [resource, single] of [['payment-methods', 'payment-method'], ['payment-frequencies', 'payment-frequency']]) {
+    await visit(`/${resource}`, `.${single}-list-screen .p-datatable-tbody .p-checkbox-box`);
+    await evaluate(`document.querySelectorAll('.${single}-list-screen .p-datatable-tbody .p-checkbox-box')[3].click()`);
+    await click(`.${single}-list-screen .p-paginator-next`);
+    await waitFor(`document.querySelector('.${single}-list-screen .p-datatable-tbody').textContent.includes('${resource === 'payment-methods' ? 'Método 6' : 'Frequência 6'}')`);
+    await click(`.${single}-list-screen .p-datatable-tbody .p-checkbox-box`);
+    await click(`.${single}-actions-group .btn-danger`);
+    await click('.p-confirm-dialog-accept');
+    await waitFor("!document.querySelector('.p-confirm-dialog')");
+    assert.deepEqual(JSON.parse(latest(`/${resource}/all`, 'DELETE').body), [4, 6]);
+  }
+  console.log('OK exclusão em lote de métodos e frequências com seleção entre páginas');
+
+  await evaluate("localStorage.removeItem('payable-visible-fields'); localStorage.setItem('payable-card-visible-fields', JSON.stringify(['amount', 'currentAmount', 'paidAmount', 'balance', 'createdBy', 'invalid']));");
+  await visit('/payables', '.payable-card');
+  assert.equal(await evaluate("!!document.querySelector('.payable-card .current-amount') && !!document.querySelector('.payable-card .paid-amount')"), true);
+  await evaluate("localStorage.removeItem('payable-card-visible-fields'); localStorage.removeItem('payable-visible-fields');");
+  await visit('/payables/create', '#description');
+  await fill('#description', 'Conta com falha no anexo');
+  await number('#amount', '25,00');
+  await fill('#dueDate', '2099-01-01');
+  await evaluate("(() => { const data = new DataTransfer(); data.items.add(new File(['pdf'], 'conta.pdf', { type: 'application/pdf' })); const input = document.querySelector('#file'); input.files = data.files; input.dispatchEvent(new Event('change', { bubbles: true })); })()");
+  failPath = '/payables/20/files';
+  await click('button[type=submit]');
+  await waitFor("location.pathname.split('/').filter(Boolean).join('/') === 'payables' && document.body.textContent.includes('Conta cadastrada, mas falhou ao enviar o arquivo.')");
+  failPath = '';
+  console.log('OK preferências de campos antigas e falha parcial no envio de anexo');
+
+  for (const width of [390, 576, 767, 768, 1024]) {
+    await cdp('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: false });
+    for (const [resource, single] of [['payables', 'payable'], ['receivables', 'receivable'], ['payment-methods', 'payment-method'], ['payment-frequencies', 'payment-frequency']]) {
+      await visit(`/${resource}`, `.${single}-list-screen`);
+      assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true, `${resource} list ${width}`);
+      if (width === 390) await screenshot(`${resource}-list-mobile`);
+      await visit(`/${resource}/create`, 'button[type=submit]');
+      assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true, `${resource} form ${width}`);
+      if (width === 390) await screenshot(`${resource}-form-mobile`);
+    }
+    await visit('/financial-settings', '#defaultLateFeePercent');
+    assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true, `financial-settings ${width}`);
+    await visit('/reports/financial-reports', '.financial-report-list-screen');
+    await waitFor("document.querySelectorAll('.month-group').length === 12");
+    assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true, `financial-reports ${width}`);
+    if (width === 390) await screenshot('financial-reports-mobile');
+    await visit('/receivables', '.receivable-card');
+    await click('.receivable-card button[aria-label="Arquivos da conta"]');
+    await waitFor("!!document.querySelector('.receivable-files-dialog')");
+    assert.equal(await evaluate("document.querySelector('.receivable-files-dialog').scrollWidth <= document.querySelector('.receivable-files-dialog').clientWidth + 1"), true, `receivable files ${width}`);
+  }
+  await cdp('Emulation.clearDeviceMetricsOverride');
+  console.log('OK telas financeiras nos breakpoints 390/576/767/768/1024 sem transbordamento');
+
+
   await authenticate(adminToken);
   await visit('/system-settings', 'input[placeholder="Nome da empresa"]');
   failPath = '/system-settings';
@@ -741,6 +1253,10 @@ try {
   assert.equal(await evaluate("localStorage.getItem('token')"), null);
   assert.deepEqual(browserErrors, []);
   console.log('OK falha HTTP, largura mobile, logout e ausência de erros JavaScript');
+} catch (error) {
+  console.error('Falha no teste de navegação:', error);
+  console.error(await evaluate('({ path: location.pathname, text: document.body.innerText.slice(0, 2000) })'));
+  throw error;
 } finally {
   const browserClosed = new Promise((done) => chrome.once('exit', done));
   chrome.kill();

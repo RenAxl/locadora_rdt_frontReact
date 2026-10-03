@@ -492,3 +492,104 @@ A revisão final voltou a comparar todas as páginas/componentes de feature, cam
 ### Diferenças técnicas preservadas
 
 React continua usando estado local, efeitos com cleanup, services async/await e PrimeReact. Classes TypeScript de dados seguem os contratos do Angular sem decorators ou RxJS. Os nomes de DTOs de detalhes já existentes no React foram mantidos onde não havia diferença funcional. A sidebar React continua ajustando a margem do conteúdo porque renderiza o `aside` diretamente, enquanto o Angular reserva largura no elemento do componente; o resultado visual acompanha a referência.
+
+
+## Sincronização com Angular - 2026-10-02
+
+Atualização incremental usando o estado atual de `locadora_rdt_frontend` (commit `db6936d`) como referência funcional. A base React era o commit `8ed7ba2`. A análise leu os dois projetos e comparou features, componentes, campos, contratos HTTP, guards, permissões, formulários, ações, estilos e assets; o histórico Git foi usado apenas como apoio. Angular e backend permaneceram somente para leitura.
+
+### Diferenças encontradas e implementadas
+
+As features de identidade, organização e configurações do sistema já tinham equivalentes funcionais. Não foram reescritas. Faltavam seis features financeiras completas:
+
+| Feature adicionada | Local no React | Comportamento preservado do Angular |
+|---|---|---|
+| Contas a pagar | `src/features/financial/payables` | Formulário, cartões, filtros completos, períodos rápidos, paginação, personalização persistida, Excel, detalhes, anexos, baixa total/parcial e encargos de atraso |
+| Contas a receber | `src/features/financial/receivables` | Recursos equivalentes de contas, cliente obrigatório, recibo e cupom fiscal para contas pagas, exibição de resíduos e valores históricos |
+| Formas de pagamento | `src/features/financial/payment-methods` | CRUD, taxa percentual opcional, seleção entre páginas, exclusão em lote, detalhes, personalização de colunas e Excel |
+| Frequências de pagamento | `src/features/financial/payment-frequencies` | CRUD, frequência e dias obrigatórios, zero dias permitido, seleção entre páginas, exclusão em lote, detalhes, colunas e Excel |
+| Configurações financeiras | `src/features/settings/financial-settings` | Consulta/atualização dos percentuais de multa e juros; salvar exige WRITE |
+| Relatórios financeiros | `src/features/reports/financial-reports` | Sete tipos de relatório, PDF/Excel, filtros condicionais, validações de datas/valores/ano e comparação financeira mensal |
+
+As implementações seguem o React existente: services com async/await e o `httpClient` central, estado local com `useState`/`useEffect`, models/DTOs e mappers explícitos, Bootstrap e PrimeReact. Foram reutilizados `DataTable`, `NameFilter`, `FieldCustomization`, `ExcelExport`, `Message`, confirmações e notificações. O modal de arquivos segue a implementação React de arquivos do cliente. Não foram instaladas dependências, atualizadas versões ou criadas novas configurações HTTP.
+
+### Rotas e permissões adicionadas
+
+| Rotas | Permissão |
+|---|---|
+| `/payables` | `PAYABLE_READ` |
+| `/payables/create`, `/payables/:payableId/edit` | `PAYABLE_WRITE` |
+| `/receivables` | `RECEIVABLE_READ` |
+| `/receivables/create`, `/receivables/:receivableId/edit` | `RECEIVABLE_WRITE` |
+| `/payment-methods` | `METHODS_READ` |
+| `/payment-methods/create`, `/payment-methods/:paymentMethodId/edit` | `METHODS_WRITE` |
+| `/payment-frequencies` | `FREQUENCY_READ` |
+| `/payment-frequencies/create`, `/payment-frequencies/:paymentFrequencyId/edit` | `FREQUENCY_WRITE` |
+| `/financial-settings` | `FINANCIAL_SETTINGS_READ`; salvar exige `FINANCIAL_SETTINGS_WRITE` |
+| `/reports/financial-reports` | `FINANCIAL_REPORTS_READ` |
+| `/reports` | Redireciona para `/reports/financial-reports`, que aplica seu guard |
+
+Exclusões usam `PAYABLE_DELETE`, `RECEIVABLE_DELETE`, `METHODS_DELETE` e `FREQUENCY_DELETE`. Os anexos usam READ para listar/visualizar/baixar, WRITE para enviar e DELETE para excluir. Editar e baixar contas exige WRITE e a conta deve estar aberta e não cancelada. Nenhuma authority foi criada ou alterada no backend.
+
+### Services, models, DTOs, mappers e componentes
+
+- Services adicionados: `payable.service.ts`, `payable-file.service.ts`, `receivable.service.ts`, `receivable-file.service.ts`, `payment-method.service.ts`, `payment-frequency.service.ts`, `financial-setting.service.ts` e `financial-report.service.ts`.
+- Models adicionados: `Payable`, `PayableFile`, `PayableFilters`, `Receivable`, `ReceivableFile`, `ReceivableFilters`, `PaymentMethod`, `PaymentFrequency`, `FinancialSetting`, `FinancialReport`, `FinancialReportFilter`, `FinancialReportMonth` e a interface `FinancialReportOption`.
+- DTOs das contas: consulta, inserção, atualização, baixa, resumo e arquivos, mantendo todos os campos específicos do contrato atual. Formas/frequências possuem DTOs de consulta/inserção/atualização; configurações possuem consulta/atualização; relatórios possuem dados, filtros e meses.
+- Mappers correspondentes em `mappers`, conforme a organização já usada pelo React.
+- Páginas de listagem/formulário das quatro entidades, formulário de configurações e página de relatórios. Contas incluem componentes de filtros, períodos rápidos, detalhes, arquivos, atraso, escolha/edição de encargos e baixa. Formas/frequências incluem detalhes.
+- CSS adaptado com escopo de tela/dialog, mantendo classes, medidas, cores, ícones e breakpoints do Angular. Não houve redesign nem necessidade de novos assets.
+
+### Contratos HTTP preservados
+
+| Métodos | Endpoints | Contrato |
+|---|---|---|
+| GET / POST | `/payables`, `/receivables` | Paginação, busca, status, período, vínculos, forma/frequência e limites de valor; DTO de inserção específico |
+| GET / PUT / DELETE | `/{payables,receivables}/{id}` | Consulta, atualização e exclusão |
+| POST | `/{payables,receivables}/{id}/payments` | Valor da baixa, data, forma, subtotal, taxa, juros e multa |
+| GET | `/{payables,receivables}/report` | Resumo e parâmetros legados `description`, `status`, `dateType` e datas |
+| GET | `/receivables/{id}/receipt`, `/receivables/{id}/fiscal-coupon` | PDF como Blob |
+| GET / POST | `/{payables,receivables}/{id}/files` | Lista de arquivos / multipart com `name` e `file` |
+| DELETE | `/{payables,receivables}/{id}/files/{fileId}` | Exclusão do anexo |
+| GET | `/{payables,receivables}/{id}/files/{fileId}/{view,download}` | Blob; download preserva o nome recebido nos cabeçalhos |
+| GET / POST | `/payment-methods`, `/payment-frequencies` | Paginação e filtro por `name` ou `frequency` |
+| GET / PUT / DELETE | `/{payment-methods,payment-frequencies}/{id}` | Consulta, atualização e exclusão |
+| DELETE | `/{payment-methods,payment-frequencies}/all` | Array de IDs no corpo |
+| GET / PUT | `/financial-settings` | Percentuais de multa e juros |
+| GET | `/reports/financial-reports/{reportType}/{pdf,xlsx}` | Blob e filtros do relatório |
+| GET | `/reports/financial-reports/comparison` | Totais, saldo, contagens, ano e meses |
+
+A baixa inicia o valor a pagar/receber no valor atual, calculado com o saldo em aberto mais taxa da forma de pagamento, multa e juros aplicáveis. A troca da forma recalcula a taxa e o total. O valor pode ser reduzido para uma baixa parcial, mas não pode ser zero nem ultrapassar o total. O `subtotal` enviado continua representando o valor da conta, conforme o Angular. Para contas pagas, o valor pago/recebido exibido corresponde ao valor atual. Não existe criação de parcelamentos nem desconto automático de PIX/boleto; campos históricos de desconto e vínculo com conta anterior continuam disponíveis para consulta, conforme a referência.
+
+### Arquivos existentes atualizados
+
+- `src/app/App.tsx`: rotas novas e guards existentes.
+- `src/core/config/api.config.ts`: somente os grupos financeiros ausentes.
+- `src/shared/components/sidebar/Sidebar.tsx`: grupos Financeiro/Relatórios e visibilidade de Organização também para POSITION_READ/SUPPLIER_READ.
+- `src/shared/components/sidebar/Sidebar.css`: aparência e rolagem do menu atual do Angular, preservando o offcanvas e a transição responsiva.
+- `scripts/sync-smoke.mjs`: API simulada e verificações financeiras, preservando a regressão anterior.
+- Este documento: seção acrescentada, sem apagar o histórico.
+
+Foram adicionados 108 arquivos nas seis features. Nenhum arquivo existente foi removido. As demais features e os componentes compartilhados existentes foram preservados.
+
+### Particularidades entre Angular e React
+
+O menu de Relatórios no Angular atual é visível por USER_READ/ROLE_READ, enquanto a página exige FINANCIAL_REPORTS_READ. Essa regra de visibilidade foi preservada, sem inventar uma nova regra de autorização. A permissão da rota segue FINANCIAL_REPORTS_READ. No React, o submenu recebeu um ID próprio (`submenuReportsDesktop`), pois o Angular repete o ID de Administração; isso permite alternar os grupos independentemente.
+
+Diferenças de nomes/organização já existentes continuam válidas: `role.dto.ts` representa `RoleDTO`; recuperação de senha usa `requestReset`/`reset` e os formulários já normalizam os valores; atualização do nome/ícone do sistema fica em `SessionContext`. Os contratos e comportamentos dessas features continuam equivalentes, portanto não foram reescritos.
+
+### Segunda comparação e validação
+
+A segunda análise conferiu novamente todos os componentes das features, campos de models/DTOs, mappers, services, parâmetros HTTP, rotas, permissões, formulários, cartões/tabelas, ações, filtros, paginação, modais, uploads/downloads, exportações, CSS e assets. O inventário verificou 62 componentes de feature, 24 services de feature, 92 classes de models/DTOs e 80 entradas da configuração de API. Após considerar os equivalentes funcionais já existentes, não restaram páginas, services, campos ou endpoints ausentes nas categorias revisadas.
+
+- `npm run build`: TypeScript e produção aprovados. O aviso de tamanho do bundle já existia na base; não foram alteradas dependências ou arquitetura para contorná-lo.
+- Não há comando de lint configurado no `package.json`.
+- `node scripts/sync-smoke.mjs`: regressão anterior e novos fluxos financeiros aprovados com Chrome e API local simulada.
+- Verificações novas: guards, menus, visibilidade por permissões, CRUD, filtros/ordenação, zero nos parâmetros numéricos, períodos rápidos, paginação, preferências antigas de campos, Excel, seleção entre páginas e exclusão em lote.
+- Baixa total/parcial e com atraso: payloads, limites de valor, taxa calculada sobre o saldo, troca de forma, encargos padrão/editados, ausência de descontos automáticos e valor pago/recebido igual ao atual nas contas pagas.
+- Arquivos: multipart, visualização PDF, download com nome UTF-8, exclusão, permissões e aviso de falha parcial no envio após salvar a conta.
+- Relatórios: filtros condicionais, gráfico mensal, PDF/Excel, sínteses, balanço anual, validações de datas/valores/ano e liberação dos controles após erro HTTP. Recibo e cupom fiscal usam os endpoints originais.
+- Responsividade validada em 390, 576, 767, 768 e 1024 pixels, incluindo formulários, listagens, relatórios e modal de arquivos, sem transbordamento horizontal.
+- Capturas opcionais: `SYNC_SCREENSHOTS=1 node scripts/sync-smoke.mjs`, em `node_modules/.sync-screenshots`.
+- Hashes de 459 arquivos do Angular e 329 do backend permaneceram idênticos. Nenhum desses projetos foi alterado.
+- Limitação: os fluxos foram exercitados com respostas simuladas; não houve validação contra uma instância real do backend, alteração de dados reais ou conferência do conteúdo gerado pelo servidor nos PDFs/planilhas.

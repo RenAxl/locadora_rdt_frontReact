@@ -1,0 +1,48 @@
+.payable-payment-charges-dialog .payable-form-inputs .form-control {
+  height: 46px;
+}
+
+.payable-payment-charges-dialog .payable-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.payable-payment-charges-dialog .payable-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.payable-payment-charges-dialog .payable-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.payable-payment-charges-dialog .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+@media (min-width: 992px) {
+  .payable-payment-charges-dialog .payable-form-buttons {
+    justify-content: flex-end;
+  }
+}
+
+.payable-payment-charges-dialog .payable-amount-control,
+.payable-payment-charges-dialog .payable-amount-input,
+.payable-payment-charges-dialog .payable-amount-input .p-inputnumber-input {
+  display: block;
+  width: 100%;
+}
+
+.payable-payment-charges-dialog .payable-amount-input .p-inputnumber-input {
+  height: 46px;
+}

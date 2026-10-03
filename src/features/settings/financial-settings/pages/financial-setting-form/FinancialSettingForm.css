@@ -1,0 +1,66 @@
+.financial-setting-form-screen .financial-setting-form-container {
+  width: 100%;
+}
+
+.financial-setting-form-screen .financial-setting-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.financial-setting-form-screen .financial-setting-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.financial-setting-form-screen .financial-setting-loading {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  color: #5f6b7a;
+  font-weight: 600;
+}
+
+.financial-setting-form-screen .financial-setting-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.financial-setting-form-screen .financial-setting-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.financial-setting-form-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+.financial-setting-form-screen
+  .financial-setting-form-inputs
+  .percent-input-host {
+  display: block;
+  width: 100%;
+}
+
+.financial-setting-form-screen .financial-setting-form-inputs .p-inputnumber {
+  width: 100%;
+}
+
+.financial-setting-form-screen .financial-setting-form-inputs .form-control {
+  height: 46px;
+}
+
+@media (min-width: 992px) {
+  .financial-setting-form-screen .financial-setting-form-buttons {
+    justify-content: flex-end;
+  }
+}

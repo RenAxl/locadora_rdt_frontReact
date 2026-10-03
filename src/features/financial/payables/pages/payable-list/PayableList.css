@@ -1,0 +1,291 @@
+.payable-list-screen .btn-crud-action {
+  width: 100%;
+  height: 50px;
+  border-radius: 10px;
+  font-size: 16px;
+  letter-spacing: -0.015em;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.payable-list-screen .payable-actions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.payable-list-screen .action-link {
+  display: block;
+  width: 100%;
+  text-decoration: none;
+}
+
+.payable-list-screen .payable-list {
+  padding: 20px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.payable-list-screen .payable-list-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: #64748b;
+}
+
+.payable-list-screen .payable-list-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payable-list-screen .payable-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.payable-list-screen .payable-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) 222px;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(35, 50, 71, 0.12);
+  border-left: 6px solid #dc3545;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.payable-list-screen .payable-card-paid {
+  border-left-color: #198754;
+}
+
+.payable-list-screen .payable-card-partial {
+  border-left-color: #f0ad4e;
+}
+
+.payable-list-screen .payable-card-canceled {
+  border-left-color: #6c757d;
+}
+
+.payable-list-screen .payable-main,
+.payable-list-screen .payable-title {
+  min-width: 0;
+}
+
+.payable-list-screen .payable-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.payable-list-screen .payable-id {
+  display: inline-block;
+  margin-bottom: 4px;
+  color: #6c757d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.payable-list-screen .payable-card-header h2 {
+  margin: 0;
+  color: #182536;
+  font-size: 18px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.payable-list-screen .payable-status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f8d7da;
+  color: #842029;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.payable-list-screen .payable-status-paid {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.payable-list-screen .payable-status-partial {
+  background: #fff3cd;
+  color: #7a4a00;
+}
+
+.payable-list-screen .payable-status-canceled {
+  background: #e2e3e5;
+  color: #41464b;
+}
+
+.payable-list-screen .payable-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  color: #5f6b7a;
+  font-size: 13px;
+}
+
+.payable-list-screen .payable-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.payable-list-screen .payable-card-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.payable-list-screen .payable-card-fields > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 50px;
+  padding: 6px 8px;
+  border: 1px solid rgba(35, 50, 71, 0.1);
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.payable-list-screen .payable-card-fields .amount {
+  background: #eef4f8;
+}
+
+.payable-list-screen .payable-card-fields .current-amount {
+  background: #fff5f6;
+}
+
+.payable-list-screen .payable-card-fields .paid-amount {
+  background: #eef8f1;
+}
+
+.payable-list-screen .payable-card-fields .note {
+  grid-column: span 2;
+}
+
+.payable-list-screen .payable-card-fields dt {
+  color: #6c757d;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.payable-list-screen .payable-card-fields dd {
+  margin: 0;
+  color: #182536;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.payable-list-screen .actions-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.payable-list-screen .actions-wrap .p-button {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+}
+
+.payable-list-screen .payable-list-message {
+  padding: 32px 16px;
+  text-align: center;
+  color: #5f6b7a;
+}
+
+@media (max-width: 1199px) {
+  .payable-list-screen .payable-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .payable-list-screen .payable-filter-container {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .payable-list-screen .payable-actions-group {
+    flex-direction: row;
+    width: auto;
+    gap: 12px;
+  }
+
+  .payable-list-screen .btn-crud-action {
+    width: auto;
+    height: 60px;
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .payable-list-screen .btn-crud-action {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.1;
+    width: auto;
+    height: 40px;
+    margin-bottom: 0;
+  }
+
+  .payable-list-screen .payable-actions-group {
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .payable-list-screen .payable-list {
+    padding: 14px;
+  }
+
+  .payable-list-screen .payable-card-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 479px) {
+  .payable-list-screen .payable-card-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .payable-list-screen .payable-card-fields .note {
+    grid-column: auto;
+  }
+}
+
+.payable-list-screen .due-date-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #dc3545;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

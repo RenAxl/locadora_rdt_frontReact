@@ -1,0 +1,52 @@
+.receivable-payment-charges-dialog .receivable-form-inputs .form-control {
+  height: 46px;
+}
+
+.receivable-payment-charges-dialog .receivable-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.receivable-payment-charges-dialog .receivable-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.receivable-payment-charges-dialog .receivable-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.receivable-payment-charges-dialog .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+@media (min-width: 992px) {
+  .receivable-payment-charges-dialog .receivable-form-buttons {
+    justify-content: flex-end;
+  }
+}
+
+.receivable-payment-charges-dialog .receivable-amount-control,
+.receivable-payment-charges-dialog .receivable-amount-input,
+.receivable-payment-charges-dialog
+  .receivable-amount-input
+  .p-inputnumber-input {
+  display: block;
+  width: 100%;
+}
+
+.receivable-payment-charges-dialog
+  .receivable-amount-input
+  .p-inputnumber-input {
+  height: 46px;
+}

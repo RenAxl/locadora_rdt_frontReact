@@ -47,6 +47,61 @@ export const API = {
         `${BASE_URL}/customers/${customerId}/files/${fileId}/download`,
     },
   },
+  PAYABLES: {
+    ROOT: `${BASE_URL}/payables`,
+    BY_ID: (id: number | string) => `${BASE_URL}/payables/${id}`,
+    PAY: (id: number) => `${BASE_URL}/payables/${id}/payments`,
+    REPORT: `${BASE_URL}/payables/report`,
+    FILES: {
+      ROOT: (payableId: number) => `${BASE_URL}/payables/${payableId}/files`,
+      BY_ID: (payableId: number, fileId: number) => `${BASE_URL}/payables/${payableId}/files/${fileId}`,
+      VIEW: (payableId: number, fileId: number) => `${BASE_URL}/payables/${payableId}/files/${fileId}/view`,
+      DOWNLOAD: (payableId: number, fileId: number) => `${BASE_URL}/payables/${payableId}/files/${fileId}/download`,
+    },
+  },
+
+
+  RECEIVABLES: {
+    ROOT: `${BASE_URL}/receivables`,
+    BY_ID: (id: number | string) => `${BASE_URL}/receivables/${id}`,
+    PAY: (id: number) => `${BASE_URL}/receivables/${id}/payments`,
+    REPORT: `${BASE_URL}/receivables/report`,
+    RECEIPT: (id: number) => `${BASE_URL}/receivables/${id}/receipt`,
+    FISCAL_COUPON: (id: number) => `${BASE_URL}/receivables/${id}/fiscal-coupon`,
+    FILES: {
+      ROOT: (receivableId: number) => `${BASE_URL}/receivables/${receivableId}/files`,
+      BY_ID: (receivableId: number, fileId: number) => `${BASE_URL}/receivables/${receivableId}/files/${fileId}`,
+      VIEW: (receivableId: number, fileId: number) => `${BASE_URL}/receivables/${receivableId}/files/${fileId}/view`,
+      DOWNLOAD: (receivableId: number, fileId: number) => `${BASE_URL}/receivables/${receivableId}/files/${fileId}/download`,
+    },
+  },
+
+
+  PAYMENT_METHODS: {
+    ROOT: `${BASE_URL}/payment-methods`,
+    BY_ID: (id: number | string) => `${BASE_URL}/payment-methods/${id}`,
+    DELETE_ALL: `${BASE_URL}/payment-methods/all`,
+  },
+
+
+  PAYMENT_FREQUENCIES: {
+    ROOT: `${BASE_URL}/payment-frequencies`,
+    BY_ID: (id: number | string) => `${BASE_URL}/payment-frequencies/${id}`,
+    DELETE_ALL: `${BASE_URL}/payment-frequencies/all`,
+  },
+
+
+  FINANCIAL_SETTINGS: {
+    ROOT: `${BASE_URL}/financial-settings`,
+  },
+
+
+  FINANCIAL_REPORTS: {
+    GENERATE: (reportType: string, format: string) =>
+      `${BASE_URL}/reports/financial-reports/${reportType}/${format}`,
+    COMPARISON: `${BASE_URL}/reports/financial-reports/comparison`,
+  },
+
   POSITIONS: {
     ROOT: `${BASE_URL}/positions`,
     BY_ID: (id: number | string) => `${BASE_URL}/positions/${id}`,

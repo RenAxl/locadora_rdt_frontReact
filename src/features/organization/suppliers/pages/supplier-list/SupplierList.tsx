@@ -101,7 +101,8 @@ export function SupplierList() {
       setSuppliers(loadedSuppliers);
       setSelectedSuppliers(
         loadedSuppliers.filter(
-          (supplier) => supplier.id != null && selectedIds.includes(supplier.id),
+          (supplier) =>
+            supplier.id != null && selectedIds.includes(supplier.id),
         ),
       );
       setTotalElements(data.totalElements);
@@ -214,9 +215,13 @@ export function SupplierList() {
             current.filter((id) => !deletedIds.includes(id)),
           );
           setSelectedSuppliers((current) =>
-            current.filter((record) => record.id == null || !deletedIds.includes(record.id)),
+            current.filter(
+              (record) => record.id == null || !deletedIds.includes(record.id),
+            ),
           );
-          reloadFromFirstPage(selectedSupplierIds.filter((id) => !deletedIds.includes(id)));
+          reloadFromFirstPage(
+            selectedSupplierIds.filter((id) => !deletedIds.includes(id)),
+          );
         }
       },
     });

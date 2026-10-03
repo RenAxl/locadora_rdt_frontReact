@@ -1,0 +1,44 @@
+.payable-filters-screen .payable-filters {
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+.payable-filters-screen .payable-form-inputs .form-control {
+  height: 46px;
+}
+
+.payable-filters-screen .payable-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.payable-filters-screen .payable-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.payable-filters-screen .payable-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.payable-filters-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+@media (min-width: 992px) {
+  .payable-filters-screen .payable-form-buttons {
+    justify-content: flex-end;
+  }
+}

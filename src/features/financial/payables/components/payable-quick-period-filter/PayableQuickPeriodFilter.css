@@ -1,0 +1,62 @@
+.payable-quick-period-screen .quick-period-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.payable-quick-period-screen .quick-period-title {
+  color: #233247;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.payable-quick-period-screen .quick-period-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payable-quick-period-screen .quick-period-chip {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(47, 58, 69, 0.22);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #233247;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.1;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.payable-quick-period-screen .quick-period-chip:hover:not(:disabled),
+.payable-quick-period-screen .quick-period-chip.selected {
+  border-color: #233247;
+  background: #2f3a45;
+  color: #ffffff;
+}
+
+.payable-quick-period-screen .quick-period-chip.clear {
+  border-color: rgba(108, 117, 125, 0.35);
+  color: #5f6b7a;
+}
+
+.payable-quick-period-screen .quick-period-chip.clear:hover:not(:disabled) {
+  border-color: #6c757d;
+  background: #6c757d;
+  color: #ffffff;
+}
+
+.payable-quick-period-screen .quick-period-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 767px) {
+  .payable-quick-period-screen .quick-period-chip {
+    flex: 1 1 calc(50% - 8px);
+  }
+}

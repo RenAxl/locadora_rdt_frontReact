@@ -7,17 +7,37 @@
   bottom: 0;
   left: 0;
   z-index: 1050;
-  background-color: #0b1e39 !important;
+  background-color: #0B1E39 !important;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.sidebar.offcanvas-md {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.3s ease-in-out, top 0.3s ease-in-out,
+    visibility 0s;
+}
+
+@media (min-width: 768px) {
+  .sidebar.offcanvas-md.sidebar-collapsed {
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition-delay: 0s, 0s, 0.3s;
+  }
+}
+
 .sidebar-header {
   height: 56px;
+  flex-shrink: 0;
   padding: 0 1rem;
   display: flex;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.system-icon {
+  flex-shrink: 0;
 }
 
 .system-icon i {
@@ -25,12 +45,15 @@
   font-size: 1.55rem;
   text-shadow:
     -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
 }
 
 .system-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   margin-bottom: 0;
   color: #fff;
   font-size: 1.05rem;
@@ -38,69 +61,94 @@
   white-space: nowrap;
   text-shadow:
     -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.sidebar-nav {
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #365070 #0b1e39;
 }
 
 .sidebar-menu .header {
-  padding: 1rem 1rem 0.5rem;
-  display: flex;
-  justify-content: center;
-  text-align: center;
+  padding: 20px 24px 12px;
 }
 
 .header-chip {
-  padding: 0.22rem 1.3rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  color: #fff;
-  background: radial-gradient(
-    circle at top left,
-    rgba(255, 255, 255, 0.28),
-    rgba(0, 0, 0, 0.25)
-  );
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.15),
-    0 4px 10px rgba(0, 0, 0, 0.45);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-shadow:
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
+  display: block;
+  color: #a4b8d3;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.sidebar-menu .treeview {
+  margin: 4px 8px;
+}
+
+.sidebar-menu .nav-link {
+  min-height: 44px;
+  border-radius: 8px;
+  color: #d6e2f2;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.sidebar-menu .nav-link i:not(.submenu-toggle-icon) {
+  width: 18px;
+  flex-shrink: 0;
+  color: #a4b8d3;
+  text-align: center;
+}
+
+.sidebar-menu .nav-link span {
+  min-width: 0;
 }
 
 .sidebar-menu .treeview > a {
-  padding-top: 0.55rem;
-  padding-bottom: 0.55rem;
-  border-left: 3px solid transparent;
-  color: #fff;
-  font-size: 0.95rem;
-  transition: all 0.25s ease-in-out;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
-.sidebar-menu .treeview > a:hover,
-.sidebar-menu .treeview > a.active {
-  padding-left: 1.2rem;
-  border-left-color: rgba(255, 255, 255, 0.85);
+.sidebar-menu .nav-link:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.sidebar-menu .treeview > a:hover :is(span, i),
-.sidebar-menu .treeview > a.active :is(span, i) {
-  color: #fff !important;
-  text-shadow:
-    0 0 4px rgba(255, 255, 255, 0.8),
-    0 0 6px rgba(255, 255, 255, 0.5),
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
+.sidebar-menu .nav-link:hover i:not(.submenu-toggle-icon) {
+  color: #d6e8ff;
+}
+
+.sidebar-menu .treeview > a[data-bs-toggle="collapse"]:not(.collapsed) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-menu .nav-link.active {
+  color: #fff;
+  background: rgba(71, 145, 235, 0.22);
+  box-shadow: inset 3px 0 #7eb8ff;
+}
+
+.sidebar-menu .nav-link.active i:not(.submenu-toggle-icon) {
+  color: #9dccff;
+}
+
+.sidebar-menu .nav-link:focus-visible {
+  outline: 2px solid #9dccff;
+  outline-offset: 2px;
+}
+
+.submenu-toggle-icon {
+  color: #a4b8d3;
+  font-size: 0.75rem;
 }
 
 .submenu-toggle-icon.open {
@@ -115,18 +163,50 @@
   display: inline-block;
 }
 
-.treeview-menu .nav-link {
-  color: #fff;
-  font-size: 0.9rem;
+.treeview-menu {
+  margin: 6px 8px 10px 20px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(164, 184, 211, 0.2);
 }
 
-.treeview-menu .nav-link:hover,
+.treeview-menu li {
+  margin-bottom: 4px;
+}
+
+.treeview-menu .nav-link {
+  padding: 10px 12px !important;
+  align-items: flex-start !important;
+  font-size: 0.85rem;
+}
+
+.treeview-menu .nav-link > i {
+  margin-top: 3px;
+  font-size: 0.85rem;
+}
+
+.treeview-menu .nav-link > span {
+  flex: 1;
+  overflow-wrap: break-word;
+}
+
 .treeview-menu .nav-link.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
+  font-weight: 600;
 }
 
 @media (max-width: 767.98px) {
+  .sidebar.offcanvas-md {
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition-delay: 0s, 0s, 0.3s;
+  }
+
+  .sidebar.offcanvas-md.showing,
+  .sidebar.offcanvas-md.show:not(.hiding) {
+    transform: translateX(0);
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
   .sidebar {
     top: 56px;
     height: calc(100vh - 56px);
@@ -146,50 +226,14 @@
   }
 
   .system-name {
-    min-width: 0;
     flex: 1;
-    overflow: hidden;
     font-size: 0.98rem;
-    text-overflow: ellipsis;
   }
-
-  .sidebar-nav {
-    overflow-y: auto;
-  }
-}
-
-.sidebar.offcanvas-md {
-  transform: translateX(0);
-  visibility: visible;
-  transition: transform 0.3s ease-in-out, top 0.3s ease-in-out,
-    visibility 0s;
-}
-
-@media (min-width: 768px) {
-  .sidebar.offcanvas-md.sidebar-collapsed {
-    transform: translateX(-100%);
-    visibility: hidden;
-    transition-delay: 0s, 0s, 0.3s;
-  }
-}
-
-
-@media (max-width: 767.98px) {
-  .sidebar.offcanvas-md {
-    transform: translateX(-100%);
-    visibility: hidden;
-    transition-delay: 0s, 0s, 0.3s;
-  }
-
-  .sidebar.offcanvas-md.showing,
-  .sidebar.offcanvas-md.show:not(.hiding) {
-    transform: translateX(0);
-    visibility: visible;
-    transition-delay: 0s;
-  }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sidebar.offcanvas-md { transition: none; }
+  .sidebar.offcanvas-md,
+  .sidebar-menu .nav-link {
+    transition: none;
+  }
 }

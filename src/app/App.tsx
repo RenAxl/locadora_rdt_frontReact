@@ -1,3 +1,13 @@
+import { PayableList } from "../features/financial/payables/pages/payable-list/PayableList";
+import { PayableForm } from "../features/financial/payables/pages/payable-form/PayableForm";
+import { ReceivableList } from "../features/financial/receivables/pages/receivable-list/ReceivableList";
+import { ReceivableForm } from "../features/financial/receivables/pages/receivable-form/ReceivableForm";
+import { PaymentMethodList } from "../features/financial/payment-methods/pages/payment-method-list/PaymentMethodList";
+import { PaymentMethodForm } from "../features/financial/payment-methods/pages/payment-method-form/PaymentMethodForm";
+import { PaymentFrequencyList } from "../features/financial/payment-frequencies/pages/payment-frequency-list/PaymentFrequencyList";
+import { PaymentFrequencyForm } from "../features/financial/payment-frequencies/pages/payment-frequency-form/PaymentFrequencyForm";
+import { FinancialSettingForm } from "../features/settings/financial-settings/pages/financial-setting-form/FinancialSettingForm";
+import { FinancialReportList } from "../features/reports/financial-reports/pages/financial-report-list/FinancialReportList";
 import { DepartmentList } from "../features/organization/departments/pages/department-list/DepartmentList";
 import { DepartmentForm } from "../features/organization/departments/pages/department-form/DepartmentForm";
 import { PositionList } from "../features/organization/positions/pages/position-list/PositionList";
@@ -77,6 +87,22 @@ export function App() {
           />
         </Route>
         <Route element={<MainLayout />}>
+          <Route path="payables" element={<AuthGuard authorities={["PAYABLE_READ"]}><PayableList /></AuthGuard>} />
+          <Route path="payables/create" element={<AuthGuard authorities={["PAYABLE_WRITE"]}><PayableForm /></AuthGuard>} />
+          <Route path="payables/:payableId/edit" element={<AuthGuard authorities={["PAYABLE_WRITE"]}><PayableForm /></AuthGuard>} />
+          <Route path="receivables" element={<AuthGuard authorities={["RECEIVABLE_READ"]}><ReceivableList /></AuthGuard>} />
+          <Route path="receivables/create" element={<AuthGuard authorities={["RECEIVABLE_WRITE"]}><ReceivableForm /></AuthGuard>} />
+          <Route path="receivables/:receivableId/edit" element={<AuthGuard authorities={["RECEIVABLE_WRITE"]}><ReceivableForm /></AuthGuard>} />
+          <Route path="payment-methods" element={<AuthGuard authorities={["METHODS_READ"]}><PaymentMethodList /></AuthGuard>} />
+          <Route path="payment-methods/create" element={<AuthGuard authorities={["METHODS_WRITE"]}><PaymentMethodForm /></AuthGuard>} />
+          <Route path="payment-methods/:paymentMethodId/edit" element={<AuthGuard authorities={["METHODS_WRITE"]}><PaymentMethodForm /></AuthGuard>} />
+          <Route path="payment-frequencies" element={<AuthGuard authorities={["FREQUENCY_READ"]}><PaymentFrequencyList /></AuthGuard>} />
+          <Route path="payment-frequencies/create" element={<AuthGuard authorities={["FREQUENCY_WRITE"]}><PaymentFrequencyForm /></AuthGuard>} />
+          <Route path="payment-frequencies/:paymentFrequencyId/edit" element={<AuthGuard authorities={["FREQUENCY_WRITE"]}><PaymentFrequencyForm /></AuthGuard>} />
+          <Route path="financial-settings" element={<AuthGuard authorities={["FINANCIAL_SETTINGS_READ"]}><FinancialSettingForm /></AuthGuard>} />
+          <Route path="reports" element={<Navigate to="/reports/financial-reports" replace />} />
+          <Route path="reports/financial-reports" element={<AuthGuard authorities={["FINANCIAL_REPORTS_READ"]}><FinancialReportList /></AuthGuard>} />
+
           <Route path="departments" element={<AuthGuard authorities={["DEPARTMENT_READ"]}><DepartmentList /></AuthGuard>} />
           <Route path="departments/create" element={<AuthGuard authorities={["DEPARTMENT_WRITE"]}><DepartmentForm /></AuthGuard>} />
           <Route path="departments/:departmentId/edit" element={<AuthGuard authorities={["DEPARTMENT_WRITE"]}><DepartmentForm /></AuthGuard>} />
