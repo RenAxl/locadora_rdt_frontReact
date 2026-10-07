@@ -1,0 +1,33 @@
+.stock-balance-list-screen .actions-wrap {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+.stock-balance-list-screen .low-stock-alert {
+  color: #dc3545;
+  font-weight: 700;
+}
+.stock-balance-list-screen .minimum-quantity-input {
+  width: 82px;
+  height: 46px;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .stock-balance-list-screen .stock-balance-filter-container {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .stock-balance-list-screen .stock-balance-filter-container .filter-container {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .stock-balance-list-screen .actions-wrap {
+    flex-wrap: wrap;
+  }
+}

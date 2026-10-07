@@ -1,0 +1,150 @@
+.item-form-screen .item-form-container {
+  width: 100%;
+}
+.item-form-screen .item-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+.item-form-screen .item-form-inputs .form-control {
+  height: 46px;
+}
+.item-form-screen .item-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+.item-form-screen .item-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.item-form-screen .item-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+.item-form-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+.item-form-screen .item-image-header {
+  margin-bottom: 18px;
+}
+.item-form-screen .item-image-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+.item-form-screen .item-image-frame {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+  flex: 0 0 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.item-form-screen .item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.item-form-screen .item-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
+}
+.item-form-screen .item-image-icon {
+  font-size: 34px;
+  opacity: 0.55;
+}
+.item-form-screen .item-image-meta {
+  flex: 1;
+  min-width: 0;
+}
+.item-form-screen .item-image-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.item-form-screen .item-image-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+.item-form-screen .item-image-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.item-form-screen .upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.15s ease;
+}
+.item-form-screen .upload-btn:hover {
+  transform: translateY(-1px);
+}
+.item-form-screen .upload-btn:active {
+  transform: translateY(0px);
+}
+.item-form-screen .upload-btn-icon {
+  font-size: 14px;
+  opacity: 0.85;
+}
+.item-form-screen .upload-input {
+  display: none;
+}
+.item-form-screen .file-chip {
+  max-width: 280px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 992px) {
+  .item-form-screen .item-form-buttons {
+    justify-content: flex-end;
+  }
+}
+.item-form-screen .item-form-inputs .description-field {
+  height: auto;
+  min-height: 112px;
+  resize: vertical;
+}
+.item-form-screen .p-inputnumber,
+.item-form-screen .p-inputnumber-input {
+  width: 100%;
+}
+.item-form-screen .p-inputnumber-input {
+  height: 46px;
+}

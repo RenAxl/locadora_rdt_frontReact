@@ -593,3 +593,93 @@ A segunda análise conferiu novamente todos os componentes das features, campos 
 - Capturas opcionais: `SYNC_SCREENSHOTS=1 node scripts/sync-smoke.mjs`, em `node_modules/.sync-screenshots`.
 - Hashes de 459 arquivos do Angular e 329 do backend permaneceram idênticos. Nenhum desses projetos foi alterado.
 - Limitação: os fluxos foram exercitados com respostas simuladas; não houve validação contra uma instância real do backend, alteração de dados reais ou conferência do conteúdo gerado pelo servidor nos PDFs/planilhas.
+
+## Sincronização com Angular - 2026-10-07
+
+### Comparação e escopo
+
+Foi realizada uma comparação inicial dos dois projetos antes de alterar arquivos, considerando funcionalidades, formulários, rotas/guards, permissões, services, DTOs/models, mappers, componentes compartilhados, configuração HTTP, estilos e assets. O histórico Angular foi utilizado como apoio até `0dd5662`, incluindo as alterações locais ainda não commitadas de Relatórios de Estoque. A referência é o conteúdo atual do Angular, inclusive esses arquivos locais.
+
+Identidade, organização, financeiro e configurações já possuíam equivalentes React. As diferenças estavam em Contato, cinco features de estoque, Relatórios de Estoque e a autorização do menu de relatórios. A migração existente foi preservada. Não houve atualização de dependências, mudança de arquitetura, nova instância HTTP, alteração de contratos ou redesign.
+
+### Features e componentes adicionados
+
+| Feature | Implementação | Comportamento |
+|---|---|---|
+| Contato | `src/features/contact/pages` | Conteúdo, telefone, horários, layout e responsividade da referência; autenticação obrigatória, sem authority específica |
+| Categorias | `src/features/stocks/categories` | Cadastro/edição, validações, listagem, imagens, detalhes, atividade, seleção entre páginas, exclusão individual/em lote, colunas e Excel |
+| Itens | `src/features/stocks/items` | Cadastro/edição, nome/descrição/categoria, preço opcional ou zero, imagens, detalhes, atividade, seleção entre páginas, exclusão, colunas, Excel e acesso às unidades |
+| Unidades físicas | `src/features/stocks/item-units` | Cadastro/edição, conservação, compra e observações; detalhes, situação com motivo, baixa definitiva e reentrada, seleção, colunas e Excel |
+| Saldos | `src/features/stocks/stock-balances` | Contagens e alerta calculados no backend, mínimo inteiro não negativo, filtro, paginação, unidades por item, colunas e Excel |
+| Movimentações | `src/features/stocks/stock-movements` | Histórico e registro de entrada, saída definitiva, ajuste e alteração de situação; paginação, busca, colunas, Excel e situações traduzidas |
+| Relatórios de Estoque | `src/features/reports/stock-reports` | Saldos, abaixo do mínimo, unidades e movimentações; filtros condicionais, resumo/gráfico, PDF e Excel |
+
+Foram adicionados 14 componentes/páginas, incluindo os modais de detalhes de categoria, item e unidade. As tabelas, filtros, confirmação, personalização, exportação, mensagens e notificações reutilizam os componentes React existentes. Os estilos mantêm os valores e breakpoints do Angular, com escopo de tela ou dialog para preservar as demais features.
+
+### Rotas e permissões
+
+| Rotas | Proteção |
+|---|---|
+| `/contact` | JWT válido; nenhuma authority específica |
+| `/categories` | `CATEGORY_READ` |
+| `/categories/create`, `/categories/:categoryId/edit` | `CATEGORY_WRITE` |
+| `/items` | `ITEM_READ` |
+| `/items/create`, `/items/:itemId/edit` | `ITEM_WRITE` |
+| `/item-units` | `ITEM_UNIT_READ` |
+| `/item-units/create`, `/item-units/:itemUnitId/edit` | `ITEM_UNIT_WRITE` |
+| `/stock-balances` | `STOCK_BALANCES_READ` |
+| `/stock-balances/:itemId/units` | `STOCK_BALANCES_READ` e `ITEM_UNIT_READ` |
+| `/stock-balances/:itemId/units/create`, `/stock-balances/:itemId/units/:itemUnitId/edit` | `STOCK_BALANCES_READ` e `ITEM_UNIT_WRITE` |
+| `/stock-movements` | `STOCK_MOVEMENTS_READ` |
+| `/stock-movements/create` | `STOCK_MOVEMENTS_WRITE` |
+| `/reports/stock-reports` | `STOCK_REPORTS_READ` |
+
+As ações de exclusão usam `CATEGORY_DELETE`, `ITEM_DELETE` e `ITEM_UNIT_DELETE`. Alteração de atividade/imagem usa WRITE da entidade; situação e reentrada usam `ITEM_UNIT_WRITE`; edição do mínimo usa `STOCK_BALANCES_WRITE`. A baixa não é permitida para unidades já inativas. Reentrada exige item e categoria ativos. A escolha de unidade em uma movimentação exige `ITEM_UNIT_READ`; saída automática permanece disponível sem essa permissão.
+
+O grupo Relatórios agora é visível por `FINANCIAL_REPORTS_READ` ou `STOCK_REPORTS_READ`, e cada link verifica sua própria permissão, conforme o Angular atual. Essa regra substitui a observação histórica da sincronização anterior sobre USER_READ/ROLE_READ nesse grupo. Contato e Estoque foram acrescentados ao menu, mantendo o comportamento responsivo existente.
+
+### Services, dados e contratos
+
+Foram adicionados seis services: `category.service.ts`, `item.service.ts`, `item-unit.service.ts`, `stock-balance.service.ts`, `stock-movement.service.ts` e `stock-report.service.ts`. Todos utilizam `httpClient`, JWT, notificações e tratamento HTTP já existentes. Requisições canceladas deixam de ser tratadas como erro de serviço no interceptor, permitindo cancelar a busca anterior de unidades.
+
+Models adicionados: `Category`, `Item`, `ItemUnit`, `StockBalance`, `StockMovement`, `StockReport`, `StockReportFilter` e `StockReportOption`. Os 17 DTOs preservam os contratos de consulta, inserção, atualização, situação, mínimo, resumo, filtros e opções; seis mappers fazem a conversão explícita. O arquivo `item-unit-options.ts` mantém situações e conservação em listas separadas, com os mesmos rótulos do Angular.
+
+| Métodos | Endpoints |
+|---|---|
+| GET/POST | `/inventory/categories`, `/inventory/items`, `/inventory/item-units` |
+| GET/PUT/DELETE | `/inventory/{categories,items,item-units}/{id}` |
+| DELETE | `/inventory/{categories,items,item-units}/all`, com array de IDs no corpo |
+| PATCH | `/inventory/{categories,items,item-units}/{id}/active`, com boolean JSON |
+| GET/PUT | `/inventory/{categories,items}/{id}/image`, com Blob ou multipart `file` |
+| PATCH | `/inventory/item-units/{id}/status`, com `status` e `reason` |
+| PATCH | `/inventory/item-units/{id}/maintenance`, contrato auxiliar preservado |
+| GET | `/inventory/stock-balances`, `/{id}` e `/item/{itemId}` |
+| PATCH | `/inventory/stock-balances/{id}/minimum`, somente `minimumQuantity` no corpo |
+| GET/POST | `/inventory/stock-movements` |
+| GET | `/reports/stock-reports/options`, `/summary` e `/{reportType}/{pdf,xlsx}` |
+
+### Regras relevantes preservadas
+
+- Unidades iniciam no filtro Ativas e oferecem Com baixa/Todas. Listagem e exportação enviam o mesmo `active` opcional, inclusive `false`. Alterar o filtro limpa seleção e reinicia paginação; baixa e reentrada recarregam a lista.
+- Cadastro/edição de unidade envia somente `itemId`, `conditionStatus`, `purchaseDate` e `notes`; edição também envia `id`. Situação e código patrimonial não são enviados nesses formulários. O código gerado no backend aparece nas consultas e no histórico; não foi adicionado número de série.
+- A situação operacional é separada da conservação. Unidades AVAILABLE com item/categoria inativos aparecem indisponíveis; outras situações físicas continuam visíveis. Unidades com baixa aparecem inativas.
+- Ajuste representa o total ativo desejado e aceita zero. Saída específica exige unidade disponível e quantidade 1. Alteração de situação exige unidade ativa, quantidade 1 e situação diferente. Entrada/saída exige item e categoria ativos. Motivo aceita até 255 caracteres.
+- Trocar item/tipo limpa unidade e situação. A consulta anterior de unidades é cancelada; selects percorrem todas as páginas. Selecionar uma unidade fixa a quantidade em 1.
+- Contagens/alerta vêm do backend. O mínimo só aceita inteiro não negativo e volta ao valor do servidor após erro/valor inválido. No React, o valor digitado é confirmado ao sair do campo.
+- Relatórios carregam opções no endpoint próprio, sem exigir leitura de categorias/itens. Trocar categoria limpa item; trocar relatório limpa filtros ocultos; Com baixa limpa/desabilita situação. Resumo usa somente categoria/item. Período invertido é rejeitado. PDF abre em aba com fallback para download.
+- Upload de imagem ocorre após salvar a entidade. Falha parcial produz o aviso da referência e retorna à lista. A imagem ausente não impede o carregamento das categorias no formulário de item. URLs de prévia são liberadas.
+
+### Segunda comparação e validação
+
+A revisão final comparou novamente todas as features, contratos, fields, DTOs/models, mappers, services, rotas, guards, authorities, ações, filtros, paginação, modais, validações, exportação, upload, download, estilos e assets. O inventário dos dois projetos possui 76 componentes de feature correspondentes, 52 authorities e 102 templates de URL. Não foram identificados models/DTOs, referências de endpoints de services ou rotas declaradas sem equivalente. Os assets existentes são idênticos e não foi necessário acrescentar imagens.
+
+- `npm run build`: TypeScript e build de produção; permanece somente o aviso de tamanho do bundle.
+- O `package.json` não possui comando de lint.
+- `node scripts/sync-smoke.mjs`: regressão de identidade, organização, financeiro e novos fluxos de estoque com Chrome e API local simulada.
+- `scripts/stocks-smoke.mjs`: verificações adicionais de guards, permissões combinadas, menus, ações READ, CRUD, imagens multipart, preço ausente/zero, DTOs mínimos de unidades, baixa/reentrada/situação, filtro active, mínimo, ajuste zero, seleção entre páginas, PDF/Excel e erro HTTP.
+- Consulta de 1.001 unidades e troca do item confirmam paginação dos selects e ausência de seleção anterior. Saída automática é testada sem leitura de unidades.
+- As novas telas foram verificadas em 390, 576, 767, 768 e 1024 pixels, sem transbordamento horizontal. Capturas de telas desktop/mobile também foram inspecionadas.
+- Execução apenas das verificações de estoque: `SYNC_STOCKS_ONLY=1 node scripts/sync-smoke.mjs`. Capturas opcionais: `SYNC_SCREENSHOTS=1`, em `node_modules/.sync-screenshots`.
+- Angular e os dois backends foram conferidos por hashes de arquivos antes e depois; somente o projeto React foi alterado.
+
+Os testes usam respostas simuladas. Não foi validada uma instância real do backend nem o conteúdo real dos PDFs/planilhas gerados pelo servidor. Permanecem as diferenças naturais de JSX/estado React, Promises em lugar de Observable e escopo explícito de CSS; os contratos e as regras da referência foram mantidos.

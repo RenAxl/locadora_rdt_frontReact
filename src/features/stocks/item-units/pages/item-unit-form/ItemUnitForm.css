@@ -1,0 +1,46 @@
+.item-unit-form-screen .item-unit-form-container {
+  width: 100%;
+}
+.item-unit-form-screen .item-unit-card {
+  padding: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+.item-unit-form-screen .item-unit-form-inputs .form-control {
+  height: 46px;
+}
+.item-unit-form-screen .item-unit-form-inputs .p-message {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+.item-unit-form-screen .item-unit-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.item-unit-form-screen .item-unit-form-button {
+  height: 50px;
+  width: 110px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+.item-unit-form-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+
+@media (min-width: 992px) {
+  .item-unit-form-screen .item-unit-form-buttons {
+    justify-content: flex-end;
+  }
+}
+.item-unit-form-screen .item-unit-form-inputs .notes-field {
+  height: auto;
+  min-height: 112px;
+  resize: vertical;
+}

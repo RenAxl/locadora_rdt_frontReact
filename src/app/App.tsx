@@ -1,3 +1,14 @@
+import { CategoryList } from "../features/stocks/categories/pages/category-list/CategoryList";
+import { CategoryForm } from "../features/stocks/categories/pages/category-form/CategoryForm";
+import { ItemList } from "../features/stocks/items/pages/item-list/ItemList";
+import { ItemForm } from "../features/stocks/items/pages/item-form/ItemForm";
+import { ItemUnitList } from "../features/stocks/item-units/pages/item-unit-list/ItemUnitList";
+import { ItemUnitForm } from "../features/stocks/item-units/pages/item-unit-form/ItemUnitForm";
+import { StockBalanceList } from "../features/stocks/stock-balances/pages/stock-balance-list/StockBalanceList";
+import { StockMovementList } from "../features/stocks/stock-movements/pages/stock-movement-list/StockMovementList";
+import { StockMovementForm } from "../features/stocks/stock-movements/pages/stock-movement-form/StockMovementForm";
+import { StockReportList } from "../features/reports/stock-reports/pages/stock-report-list/StockReportList";
+import { Contact } from "../features/contact/pages/Contact";
 import { PayableList } from "../features/financial/payables/pages/payable-list/PayableList";
 import { PayableForm } from "../features/financial/payables/pages/payable-form/PayableForm";
 import { ReceivableList } from "../features/financial/receivables/pages/receivable-list/ReceivableList";
@@ -87,6 +98,24 @@ export function App() {
           />
         </Route>
         <Route element={<MainLayout />}>
+          <Route path="contact" element={<AuthGuard><Contact /></AuthGuard>} />
+          <Route path="categories" element={<AuthGuard authorities={["CATEGORY_READ"]}><CategoryList /></AuthGuard>} />
+          <Route path="categories/create" element={<AuthGuard authorities={["CATEGORY_WRITE"]}><CategoryForm /></AuthGuard>} />
+          <Route path="categories/:categoryId/edit" element={<AuthGuard authorities={["CATEGORY_WRITE"]}><CategoryForm /></AuthGuard>} />
+          <Route path="items" element={<AuthGuard authorities={["ITEM_READ"]}><ItemList /></AuthGuard>} />
+          <Route path="items/create" element={<AuthGuard authorities={["ITEM_WRITE"]}><ItemForm /></AuthGuard>} />
+          <Route path="items/:itemId/edit" element={<AuthGuard authorities={["ITEM_WRITE"]}><ItemForm /></AuthGuard>} />
+          <Route path="item-units" element={<AuthGuard authorities={["ITEM_UNIT_READ"]}><ItemUnitList /></AuthGuard>} />
+          <Route path="item-units/create" element={<AuthGuard authorities={["ITEM_UNIT_WRITE"]}><ItemUnitForm /></AuthGuard>} />
+          <Route path="item-units/:itemUnitId/edit" element={<AuthGuard authorities={["ITEM_UNIT_WRITE"]}><ItemUnitForm /></AuthGuard>} />
+          <Route path="stock-balances" element={<AuthGuard authorities={["STOCK_BALANCES_READ"]}><StockBalanceList /></AuthGuard>} />
+          <Route path="stock-movements" element={<AuthGuard authorities={["STOCK_MOVEMENTS_READ"]}><StockMovementList /></AuthGuard>} />
+          <Route path="stock-movements/create" element={<AuthGuard authorities={["STOCK_MOVEMENTS_WRITE"]}><StockMovementForm /></AuthGuard>} />
+          <Route path="reports/stock-reports" element={<AuthGuard authorities={["STOCK_REPORTS_READ"]}><StockReportList /></AuthGuard>} />
+          <Route path="stock-balances/:itemId/units" element={<AuthGuard authorities={["STOCK_BALANCES_READ"]}><AuthGuard authorities={["ITEM_UNIT_READ"]}><ItemUnitList /></AuthGuard></AuthGuard>} />
+          <Route path="stock-balances/:itemId/units/create" element={<AuthGuard authorities={["STOCK_BALANCES_READ"]}><AuthGuard authorities={["ITEM_UNIT_WRITE"]}><ItemUnitForm /></AuthGuard></AuthGuard>} />
+          <Route path="stock-balances/:itemId/units/:itemUnitId/edit" element={<AuthGuard authorities={["STOCK_BALANCES_READ"]}><AuthGuard authorities={["ITEM_UNIT_WRITE"]}><ItemUnitForm /></AuthGuard></AuthGuard>} />
+
           <Route path="payables" element={<AuthGuard authorities={["PAYABLE_READ"]}><PayableList /></AuthGuard>} />
           <Route path="payables/create" element={<AuthGuard authorities={["PAYABLE_WRITE"]}><PayableForm /></AuthGuard>} />
           <Route path="payables/:payableId/edit" element={<AuthGuard authorities={["PAYABLE_WRITE"]}><PayableForm /></AuthGuard>} />

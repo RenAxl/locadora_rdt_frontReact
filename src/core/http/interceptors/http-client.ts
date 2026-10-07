@@ -35,6 +35,7 @@ httpClient.interceptors.request.use((config) => {
 httpClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (axios.isCancel(error)) return Promise.reject(error);
     const url = error.config?.url || "";
     const status = error.response?.status;
     const isUserPhotoEndpoint =

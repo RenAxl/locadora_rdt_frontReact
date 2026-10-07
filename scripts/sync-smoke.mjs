@@ -1,3 +1,4 @@
+import { runStockSmoke } from "./stocks-smoke.mjs";
 // Verifica os fluxos sincronizados usando Chrome e uma API local simulada.
 // Não acessa nem altera o backend real. Execute: node scripts/sync-smoke.mjs
 import assert from 'node:assert/strict';
@@ -22,7 +23,9 @@ const token = (authorities, exp = Math.floor(Date.now() / 1000) + 3600) =>
   `e30.${Buffer.from(JSON.stringify({ exp, user_name: 'teste@example.com', authorities })).toString('base64url')}.test`;
 const organizationAuthorities = ['DEPARTMENT', 'POSITION', 'EMPLOYEE', 'SUPPLIER'].flatMap((name) => ['READ', 'WRITE', 'DELETE'].map((action) => `${name}_${action}`));
 const financialAuthorities = ['PAYABLE', 'RECEIVABLE', 'METHODS', 'FREQUENCY'].flatMap((name) => ['READ', 'WRITE', 'DELETE'].map((action) => `${name}_${action}`));
-const adminToken = token([...organizationAuthorities, ...financialAuthorities, 'FINANCIAL_SETTINGS_READ', 'FINANCIAL_SETTINGS_WRITE', 'FINANCIAL_REPORTS_READ', 'ROLE_ADMINISTRADOR', 'USER_READ', 'USER_WRITE', 'USER_PROFILE_READ', 'ROLE_READ', 'ROLE_WRITE', 'CUSTOMER_READ', 'CUSTOMER_WRITE', 'CUSTOMER_DELETE', 'SYSTEM_SETTING_READ', 'SYSTEM_SETTING_WRITE']);
+const stockAuthorities = ['CATEGORY', 'ITEM', 'ITEM_UNIT'].flatMap(name => ['READ', 'WRITE', 'DELETE'].map(action => `${name}_${action}`));
+stockAuthorities.push('STOCK_BALANCES_READ', 'STOCK_BALANCES_WRITE', 'STOCK_MOVEMENTS_READ', 'STOCK_MOVEMENTS_WRITE', 'STOCK_REPORTS_READ');
+const adminToken = token([...organizationAuthorities, ...financialAuthorities, ...stockAuthorities, 'FINANCIAL_SETTINGS_READ', 'FINANCIAL_SETTINGS_WRITE', 'FINANCIAL_REPORTS_READ', 'ROLE_ADMINISTRADOR', 'USER_READ', 'USER_WRITE', 'USER_PROFILE_READ', 'ROLE_READ', 'ROLE_WRITE', 'CUSTOMER_READ', 'CUSTOMER_WRITE', 'CUSTOMER_DELETE', 'SYSTEM_SETTING_READ', 'SYSTEM_SETTING_WRITE']);
 
 const audit = { createdAt: '2026-09-29T12:00:00Z', updatedAt: '2026-09-29T13:00:00Z', createdBy: 'admin', updatedBy: 'gestor' };
 const organization = {
@@ -62,6 +65,11 @@ const financial = {
 const financialFiles = { payables: [], receivables: [] };
 
 
+const categories = Array.from({ length: 6 }, (_, index) => ({ id: index + 1, name: `Categoria ${index + 1}`, active: index !== 1, imageContentType: index === 0 ? 'image/png' : null, ...audit }));
+const items = Array.from({ length: 6 }, (_, index) => ({ id: index + 1, name: `Item ${index + 1}`, description: 'Descrição do item', category: categories[index === 1 ? 1 : 0], active: true, price: index === 0 ? 0 : null, ...audit }));
+let units = Array.from({ length: 7 }, (_, index) => ({ id: index + 1, item: items[0], assetCode: `ITEM-1-CODE000${index + 1}`, status: ['AVAILABLE', 'MAINTENANCE', 'DAMAGED', 'LOST', 'UNAVAILABLE', 'AVAILABLE', 'AVAILABLE'][index], conditionStatus: 'GOOD', active: index !== 6, purchaseDate: '2026-01-10', notes: 'Unidade de teste', ...audit }));
+const stock = { categories, items, 'item-units': units, 'stock-balances': [{ id: 1, itemId: 1, itemName: 'Item 1', totalQuantity: 6, availableQuantity: 2, unavailableQuantity: 1, maintenanceQuantity: 1, damagedQuantity: 1, lostQuantity: 1, minimumQuantity: 3, lowStock: true, ...audit }], 'stock-movements': [{ id: 1, itemId: 1, itemName: 'Item 1', type: 'ENTRY', quantity: 6, assetCode: null, previousStatus: null, newStatus: null, ...audit }, { id: 2, itemId: 1, itemName: 'Item 1', type: 'STATUS_CHANGE', quantity: 1, itemUnitId: 2, assetCode: 'ITEM-1-CODE0002', previousStatus: 'AVAILABLE', newStatus: 'MAINTENANCE', reason: 'Revisão', ...audit }] };
+
 const server = await createServer({
   server: { host: '127.0.0.1', port, strictPort: true },
   plugins: [{ name: 'sync-test-api', configureServer(vite) {
@@ -84,6 +92,54 @@ const server = await createServer({
       let data = {};
       const parts = url.pathname.split('/');
       const resource = parts[1];
+      if (url.pathname.startsWith('/reports/stock-reports/')) {
+        if (parts[3] === 'options') data = { categories: stock.categories, items: stock.items.map(item => ({ id: item.id, name: item.name, categoryId: item.category.id })) };
+        else if (parts[3] === 'summary') data = { itemCount: 6, totalQuantity: 6, availableQuantity: 2, unavailableQuantity: 1, maintenanceQuantity: 1, damagedQuantity: 1, lostQuantity: 1, lowStockItemCount: 1 };
+        else {
+          res.setHeader('Content-Type', parts[4] === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          res.end(parts[4] === 'pdf' ? '%PDF-1.4 test' : 'mock excel'); return;
+        }
+        res.end(JSON.stringify(data)); return;
+      }
+      if (resource === 'inventory') {
+        const entity = parts[2];
+        const id = Number(parts[3]);
+        if (parts[4] === 'image') {
+          if (req.method === 'GET') { res.setHeader('Content-Type', 'image/png'); res.end(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aE3sAAAAASUVORK5CYII=', 'base64')); return; }
+        } else if (parts[4] === 'minimum') {
+          data = { ...stock[entity].find(record => record.id === id), ...JSON.parse(body) };
+          stock[entity] = stock[entity].map(record => record.id === id ? data : record);
+        } else if (parts[4] === 'active' || parts[4] === 'status') {
+          const update = parts[4] === 'active' ? { active: JSON.parse(body) } : { status: JSON.parse(body).status };
+          data = { ...stock[entity].find(record => record.id === id), ...update };
+          stock[entity] = stock[entity].map(record => record.id === id ? data : record);
+        } else if (req.method === 'DELETE') {
+          const ids = parts[3] === 'all' ? JSON.parse(body) : [id];
+          if (entity === 'item-units') stock[entity] = stock[entity].map(record => ids.includes(record.id) ? { ...record, active: false } : record);
+          else stock[entity] = stock[entity].filter(record => !ids.includes(record.id));
+        } else if (req.method === 'POST' || req.method === 'PUT') {
+          data = { ...JSON.parse(body), id: req.method === 'POST' ? 20 : id, active: true, ...audit };
+          if (entity === 'items') data.category = stock.categories.find(category => category.id === data.categoryId);
+          if (entity === 'item-units') { data.item = stock.items.find(item => item.id === data.itemId); data.assetCode = 'ITEM-1-GENERATED'; data.status = 'AVAILABLE'; }
+          if (req.method === 'POST') stock[entity].push(data);
+          else stock[entity] = stock[entity].map(record => record.id === id ? { ...record, ...data } : record);
+        } else if (parts[3]) {
+          data = parts[3] === 'item' ? stock[entity].find(record => record.itemId === Number(parts[4])) : stock[entity].find(record => record.id === id);
+        } else {
+          const filter = url.searchParams.get('name') || '';
+          const active = url.searchParams.get('active');
+          const itemId = url.searchParams.get('itemId');
+          let filtered = stock[entity].filter(record => (record.name || record.itemName || record.item?.name || record.assetCode || '').includes(filter));
+          if (entity === 'item-units') {
+            if (active != null) filtered = filtered.filter(record => record.active === (active === 'true'));
+            if (itemId != null) filtered = filtered.filter(record => record.item?.id === Number(itemId));
+          }
+          const size = Number(url.searchParams.get('linesPerPage') || 5);
+          const start = Number(url.searchParams.get('page') || 0) * size;
+          data = { content: filtered.slice(start, start + size), totalElements: filtered.length };
+        }
+        res.end(JSON.stringify(data)); return;
+      }
       if (url.pathname === '/financial-settings') {
         if (req.method === 'PUT') financialSetting = { ...financialSetting, ...JSON.parse(body) };
         res.end(JSON.stringify(financialSetting)); return;
@@ -331,6 +387,11 @@ async function screenshot(name) {
 const latest = (path, method) => [...requests].reverse().find((request) => request.path === path && request.method === method);
 
 try {
+  if (process.env.SYNC_STOCKS_ONLY) {
+    await visit("/login", "#email");
+  await runStockSmoke({ evaluate, waitFor, visit, fill, click, select, number, authenticate, screenshot, cdp, token, adminToken, latest, requests, stock, origin, setFailPath: value => { failPath = value; } });
+    assert.deepEqual(browserErrors, []);
+  } else {
   await visit('/login', '#email');
   await fill('#email', 'teste@example.com');
   await fill('#password', 'secret');
@@ -506,6 +567,7 @@ try {
 
   await authenticate(adminToken);
   await visit('/users', '.p-datatable-tbody tr');
+  await waitFor("document.querySelectorAll('.p-datatable-tbody .p-button-danger').length === 2");
   assert.equal(await evaluate("document.querySelectorAll('.p-datatable-tbody tr')[0].querySelector('.p-button-danger').disabled"), true);
   assert.equal(await evaluate("document.querySelectorAll('.p-datatable-tbody tr')[1].querySelector('.p-button-danger').disabled"), false);
   await click('.p-datatable-thead .p-checkbox-box');
@@ -626,6 +688,7 @@ try {
     await fill(`input[placeholder^="Digite o nome"]`, organization[resource][0].name);
     await click('.filter-search-icon');
     await waitFor("document.querySelectorAll('.p-datatable-tbody tr').length === 1");
+    for (let attempt = 0; attempt < 100 && new URLSearchParams(latest(`/${resource}`, 'GET').search).get('name') !== organization[resource][0].name; attempt++) await new Promise(done => setTimeout(done, 20));
     assert.equal(new URLSearchParams(latest(`/${resource}`, 'GET').search).get('name'), organization[resource][0].name);
     await click(`.${single}-list-screen .pi-file-excel`);
     await click('.p-confirm-dialog-accept');
@@ -1236,6 +1299,8 @@ try {
   await cdp('Emulation.clearDeviceMetricsOverride');
   console.log('OK telas financeiras nos breakpoints 390/576/767/768/1024 sem transbordamento');
 
+  await runStockSmoke({ evaluate, waitFor, visit, fill, click, select, number, authenticate, screenshot, cdp, token, adminToken, latest, requests, stock, origin, setFailPath: value => { failPath = value; } });
+
 
   await authenticate(adminToken);
   await visit('/system-settings', 'input[placeholder="Nome da empresa"]');
@@ -1253,6 +1318,7 @@ try {
   assert.equal(await evaluate("localStorage.getItem('token')"), null);
   assert.deepEqual(browserErrors, []);
   console.log('OK falha HTTP, largura mobile, logout e ausência de erros JavaScript');
+  }
 } catch (error) {
   console.error('Falha no teste de navegação:', error);
   console.error(await evaluate('({ path: location.pathname, text: document.body.innerText.slice(0, 2000) })'));

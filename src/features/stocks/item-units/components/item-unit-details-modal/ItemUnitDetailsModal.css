@@ -1,0 +1,40 @@
+.item-unit-details-modal-dialog .details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.item-unit-details-modal-dialog .details-grid > div {
+  padding: 12px;
+  border: 1px solid rgba(35, 50, 71, 0.12);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+.item-unit-details-modal-dialog .details-grid span {
+  display: block;
+  margin-bottom: 4px;
+  color: #6c757d;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.item-unit-details-modal-dialog .details-grid strong {
+  color: #182536;
+  overflow-wrap: anywhere;
+}
+.item-unit-details-modal-dialog .wide {
+  grid-column: span 2;
+}
+.item-unit-details-modal-dialog .empty {
+  padding: 24px;
+  color: #6c757d;
+  text-align: center;
+}
+
+@media (max-width: 575.98px) {
+  .item-unit-details-modal-dialog .details-grid {
+    grid-template-columns: 1fr;
+  }
+  .item-unit-details-modal-dialog .wide {
+    grid-column: auto;
+  }
+}

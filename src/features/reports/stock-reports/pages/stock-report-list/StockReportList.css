@@ -1,0 +1,111 @@
+.stock-report-list-screen .stock-report-list-container {
+  width: 100%;
+}
+.stock-report-list-screen .stock-report-card {
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+.stock-report-list-screen .stock-report-form-inputs .form-control {
+  height: 46px;
+}
+.stock-report-list-screen .form-label-custom {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #233247;
+}
+.stock-report-list-screen .stock-report-form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.stock-report-list-screen .stock-report-form-button {
+  height: 50px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+.stock-report-list-screen .summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.stock-report-list-screen .summary-header h2 {
+  margin: 0 0 12px;
+  color: #233247;
+  font-size: 22px;
+}
+.stock-report-list-screen .report-note,
+.stock-report-list-screen .loading-label {
+  color: #6c757d;
+  font-size: 14px;
+}
+.stock-report-list-screen .stock-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stock-report-list-screen .summary-item {
+  padding: 12px;
+  border: 1px solid rgba(35, 50, 71, 0.12);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+.stock-report-list-screen .summary-item span {
+  color: #6c757d;
+}
+.stock-report-list-screen .summary-item strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 24px;
+  color: #182536;
+}
+.stock-report-list-screen .summary-item.low-stock strong {
+  color: #b91c1c;
+}
+.stock-report-list-screen .availability-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 60px;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+.stock-report-list-screen .availability-row strong {
+  text-align: right;
+}
+.stock-report-list-screen .availability-track {
+  height: 20px;
+  border-radius: 4px;
+  background: #e8edf3;
+  overflow: hidden;
+}
+.stock-report-list-screen .availability-bar {
+  height: 100%;
+  border-radius: 4px;
+}
+@media (min-width: 992px) {
+  .stock-report-list-screen .stock-report-form-buttons {
+    justify-content: flex-end;
+  }
+}
+@media (max-width: 767px) {
+  .stock-report-list-screen .stock-summary {
+    grid-template-columns: 1fr;
+  }
+  .stock-report-list-screen .availability-row {
+    grid-template-columns: 110px 1fr 35px;
+    gap: 8px;
+    font-size: 13px;
+  }
+}
+@media (max-width: 576px) {
+  .stock-report-list-screen .stock-report-form-button {
+    width: 100%;
+  }
+}

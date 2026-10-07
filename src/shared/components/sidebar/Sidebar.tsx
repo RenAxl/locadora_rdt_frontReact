@@ -42,6 +42,7 @@ export function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
               <span>Home</span>
             </NavLink>
           </li>
+          <li className="treeview"><NavLink to="/contact" className="d-flex align-items-center nav-link px-3"><i className="fa-solid fa-headset me-2" /><span>Contato</span></NavLink></li>
           {authService.hasAnyAuthority(["USER_READ", "ROLE_READ"]) && (
             <li className="treeview">
               <a
@@ -140,14 +141,30 @@ export function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
               </ul>
             </li>
           )}
-          {authService.hasAnyAuthority(["USER_READ", "ROLE_READ"]) && (
+          {authService.hasAnyAuthority(["FINANCIAL_REPORTS_READ", "STOCK_REPORTS_READ"]) && (
             <li className="treeview">
               <a className="d-flex align-items-center justify-content-between nav-link px-3 collapsed" data-bs-toggle="collapse" data-bs-target="#submenuReportsDesktop" href="#relatorios">
-                <span className="d-flex align-items-center"><i className="fa-solid fa-user-shield me-2" /><span>Relatórios</span></span>
+                <span className="d-flex align-items-center"><i className="fa-solid fa-chart-column me-2" /><span>Relatórios</span></span>
                 <span><i className="fa-solid fa-caret-right submenu-toggle-icon closed" /><i className="fa-solid fa-caret-down submenu-toggle-icon open" /></span>
               </a>
               <ul className="treeview-menu collapse list-unstyled mb-0" id="submenuReportsDesktop">
-                <li><NavLink to="/reports/financial-reports" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-user me-2" /><span>Relatórios Financeiros</span></NavLink></li>
+                {authService.hasAuthority("FINANCIAL_REPORTS_READ") && <li><NavLink to="/reports/financial-reports" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-chart-line me-2" /><span>Relatórios Financeiros</span></NavLink></li>}
+                {authService.hasAuthority("STOCK_REPORTS_READ") && <li><NavLink to="/reports/stock-reports" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-boxes-stacked me-2" /><span>Relatórios de Estoque</span></NavLink></li>}
+              </ul>
+            </li>
+          )}
+          {authService.hasAnyAuthority(["CATEGORY_READ", "ITEM_READ", "STOCK_BALANCES_READ", "ITEM_UNIT_READ", "STOCK_MOVEMENTS_READ"]) && (
+            <li className="treeview">
+              <a className="d-flex align-items-center justify-content-between nav-link px-3 collapsed" data-bs-toggle="collapse" data-bs-target="#submenuEstoqueDesktop" href="#estoque">
+                <span className="d-flex align-items-center"><i className="fa-solid fa-boxes-stacked me-2" /><span>Estoque</span></span>
+                <span><i className="fa-solid fa-caret-right submenu-toggle-icon closed" /><i className="fa-solid fa-caret-down submenu-toggle-icon open" /></span>
+              </a>
+              <ul className="treeview-menu collapse list-unstyled mb-0" id="submenuEstoqueDesktop">
+                {authService.hasAuthority("CATEGORY_READ") && <li><NavLink to="/categories" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-tags me-2" /><span>Categorias</span></NavLink></li>}
+                {authService.hasAuthority("ITEM_READ") && <li><NavLink to="/items" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-box-open me-2" /><span>Itens</span></NavLink></li>}
+                {authService.hasAuthority("ITEM_UNIT_READ") && <li><NavLink to="/item-units" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-boxes-stacked me-2" /><span>Unidades físicas</span></NavLink></li>}
+                {authService.hasAuthority("STOCK_BALANCES_READ") && <li><NavLink to="/stock-balances" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-warehouse me-2" /><span>Estoque Atual</span></NavLink></li>}
+                {authService.hasAuthority("STOCK_MOVEMENTS_READ") && <li><NavLink to="/stock-movements" className="d-flex align-items-center nav-link px-4"><i className="fa-solid fa-right-left me-2" /><span>Movimentações de estoque</span></NavLink></li>}
               </ul>
             </li>
           )}
